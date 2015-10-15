@@ -1,12 +1,12 @@
 
 /*******************************************************
 
-		Program configuration
-		Set parameters here and
-		recompile in order to apply
-		Need a 'make clean' !!!
+  Program configuration
+  Set parameters here and
+  recompile in order to apply
+  Need a 'make clean' !!!
 
-*******************************************************/
+ *******************************************************/
 
 
 
@@ -57,8 +57,8 @@ enum boolean
 
 /* Structures */
 struct MemoryStruct {
-  char *memory;
-  size_t size;
+    char *memory;
+    size_t size;
 };
 
 
