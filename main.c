@@ -156,6 +156,7 @@ int main(int argc, char** argv)
             "                                 Rev %s\n", rev);
 
 
+    checkConfigurationFiles();
     networkLoop();
 
     exit(EXIT_SUCCESS);

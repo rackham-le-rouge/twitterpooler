@@ -26,15 +26,18 @@
 #include <sys/stat.h>
 #include <curl/curl.h>
 #include <sys/ioctl.h>
+#include <strings.h>
 
 /* Some constants */
-#define DEBUG_LEVEL	                    0
+#define DEBUG_LEVEL	                    5
 #define URL_LENGTH                      9 /* At least add 1 to the real URL lenght for the \0 */
 #define URL_INDEX_OF_NEW                "http://pastebin.com/archive"
 #define URL_PREFIX                      "http://pastebin.com/"
 #define TOKEN_DELIMITER_FOR_NEW_ENTRIES "border=\"0\" /><a href=\"/"
 #define TOKEN_DELIMITER_FOR_DATA_START  "onkeydown=\"return catchTab(this,event)\">"
 #define TOKEN_DELIMITER_FOR_DATA_END    "</textarea>"
+#define CHECKSUM_DIRECTORY              "checksum"
+#define CONFIGURATION_FILE              "pooler.cfg"
 #define WAIT_TIME_MAX                   15
 #define WAIT_TIME_MIN                   5
 #define WAIT_TIME_URL_MAX               2
@@ -42,6 +45,7 @@
 #define MAX_URL_BEFORE_SAVING_INIT      9
 #define MAX_URL_NUMBER_OF_TURN_TO_FIX   10
 #define MAX_URL_MAXIMUM_PER_TURN        50
+#define MAX_CONFIG_LINE_LEN             1024
 #define PROGRESS_BAR_BODY_CHARACTER     '-'
 #define PROGRESS_BAR_HEAD_CHARACTER     '>' 
 #define SCREEN_SIZE_COLUMN_MIN          20
@@ -88,7 +92,7 @@ struct MemoryStruct {
 #if(DEBUG_LEVEL > 3)
 #define LOG_MSG(p_sStr)      fprintf(stderr, "%s INFO [%d]:" p_sStr "\n", __FILE__, __LINE__);
 #else
-#define LOG_MSG(p_str)
+#define LOG_MSG(p_sStr)
 #endif
 
 #define LOG_PRINT(p_sStr, ...)      fprintf(stdout,  p_sStr "\n", __VA_ARGS__);
@@ -96,6 +100,7 @@ struct MemoryStruct {
 
 #include "parser.h"
 #include "network.h"
+#include "io.h"
 #include "main.h"
 
 

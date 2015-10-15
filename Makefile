@@ -38,7 +38,7 @@ allc: mrproper $(EXEC)
 full: mrproper $(EXEC)
 
 
-pooler: parser.o main.o network.o
+pooler: parser.o main.o network.o io.o
 	@$(CC) -o $@ $^ $(LDFLAGS)
 	@echo [LD] $@
 

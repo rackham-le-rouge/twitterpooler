@@ -97,10 +97,7 @@ void networkLoop(void)
     struct MemoryStruct l_structMemory;
 
     UNUSED(l_structMemory);
-
-    LOG_MSG("Network loop broken by user. Program's ending is near...");
 }
-
 
 
 
