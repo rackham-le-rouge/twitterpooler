@@ -92,11 +92,56 @@ int retrieveAnUrl(const char* p_cUrlToGet, struct MemoryStruct* p_structMemory)
 
 
 
+void* threadPagePooling(void* p_structInitData)
+{
+    structPagePoolingInitData* l_structInitData = (structPagePoolingInitData*)p_structInitData;
+    /*LOG_INFO("Cpy name %s", l_structInitData->sName);*/
+    return NULL;
+}
+
+
+
 void networkLoop(void)
 {
     struct MemoryStruct l_structMemory;
+    structPagePoolingInitData l_structPagePoolingInitInformation[20];  /* FIXME make a more smart system */
+    int l_iReturnedValue;
+    int l_iThreadNumber;
+    char l_sCompagnyName[MAX_CONFIG_LINE_LEN];
+    pthread_t l_structPagePoolingThreadID[20];          /* FIXME make a more smart system */
 
     UNUSED(l_structMemory);
+    l_iThreadNumber = 0;
+
+    do
+    {
+        bzero(l_sCompagnyName, MAX_CONFIG_LINE_LEN);
+        l_iReturnedValue = configurationAnalyseLineByLine(l_sCompagnyName);
+
+        if(l_iReturnedValue == EXIT_SUCCESS)
+        {
+            /* We have a valid name */
+            strcpy(l_structPagePoolingInitInformation[l_iThreadNumber].sName, l_sCompagnyName);
+            LOG_INFO("Start thread for %s", l_structPagePoolingInitInformation[l_iThreadNumber].sName);
+            if(pthread_create(  l_structPagePoolingThreadID + l_iThreadNumber,
+                                NULL,
+                                threadPagePooling,
+                                (void*)(l_structPagePoolingInitInformation + l_iThreadNumber)) < 0)
+            {
+                LOG_ERROR("Creating thread number %d for compagny %s failed.", l_iThreadNumber, l_sCompagnyName);
+            }
+            else
+            {
+                /* Creation succeed */
+                l_iThreadNumber++;
+            }
+        }
+        else if(l_iReturnedValue == EXIT_FAILURE)
+        {
+            LOG_ERROR("Thread creation killed. Compagny extraction failed. errno %d", errno);
+            break;
+        }
+    }while(l_iReturnedValue != EOF);
 }
 
 

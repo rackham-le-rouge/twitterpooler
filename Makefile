@@ -30,7 +30,7 @@ CFLAGS=          -W -Waggregate-return -Wall -Warray-bounds -Wbad-function-cast 
                  -Wunused-parameter -Wunused-value -Wunused-variable -Wvla -Wvolatile-register-var              \
                  -Wwrite-strings -fno-common -fstack-protector-all -pedantic -std=c99 -Wstrict-aliasing=3	
 
-LDFLAGS=-ansi -lm -O2 -lcurl
+LDFLAGS=-ansi -lpthread -lm -O2 -lcurl
 EXEC=pooler
 
 all: $(EXEC)

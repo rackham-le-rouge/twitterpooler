@@ -29,6 +29,7 @@
 #include <strings.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <pthread.h>
 
 /* Some constants */
 #define DEBUG_LEVEL	                    5
@@ -68,6 +69,11 @@ struct MemoryStruct {
     size_t size;
 };
 
+struct PagePoolingInitData {
+    char sName[MAX_CONFIG_LINE_LEN];
+};
+
+typedef struct PagePoolingInitData structPagePoolingInitData;
 
 
 /* Debug part */

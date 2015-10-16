@@ -185,3 +185,67 @@ int initExternalCommunication(void)
 
     return l_iReturnedValue;
 }
+
+
+/**
+ * @brief Function used to send name of the compagny stored in the configuration file, one
+ *  by one, at each call. This system allow us to start a thread for this compagny, give it the
+ *  name, and so on. If we reach the end of the file, the function send back a ret code. At the
+ *  next call, the configuration file is going to be read from the beginning.
+ * @param p_sCompagny : string where the compagny is stored. Use this result only if the function returns EXIT_SUCCESS
+ * @return EXIT_FAILURE if there is an opening issue. EOF is we reach the end of the file (no compagny to retrieve on this turn) ; EXIT_SUCCESS is p_sCompagny contains a valid compagny name
+ */
+int configurationAnalyseLineByLine(char* p_sCompagny)
+{
+    char l_cCharacter = 0;
+    char l_sLine[MAX_CONFIG_LINE_LEN];
+    unsigned int l_iCursor = 0;
+    static FILE* l_fileConfigurationFile = NULL;
+
+
+    /* First init of the function */
+    if(l_fileConfigurationFile == NULL)
+    {
+        l_fileConfigurationFile = fopen(CONFIGURATION_FILE, "r");
+
+        /* Real fail */
+        if(l_fileConfigurationFile == NULL)
+        {
+            return EXIT_FAILURE;
+        }
+    }
+
+    while(l_cCharacter != EOF)
+    {
+        l_cCharacter = fgetc(l_fileConfigurationFile);
+
+        /* End of line - Check is we take a compagny name or a keyword */
+        if(l_cCharacter == '\n' || l_iCursor > MAX_CONFIG_LINE_LEN - 1)
+        {
+            if(l_sLine[l_iCursor - 1] == ':')
+            {
+                /* Compagny name on the line */
+
+                /* Remove the 'compagny' marker. It was arbitrary decided */
+                l_sLine[l_iCursor - 1] = '\0';
+                strcpy(p_sCompagny, l_sLine);
+                /* End of this call - but another is coming that's why we don't close the stream  */
+                return EXIT_SUCCESS;
+            }
+            else
+            {
+                /* We founf keywords, clean the line and start another */
+                bzero(l_sLine, strlen(l_sLine));
+                l_iCursor = 0;
+            }
+        }
+        else
+        {
+            l_sLine[l_iCursor++] = l_cCharacter;
+        }
+    }
+
+    fclose(l_fileConfigurationFile);
+
+    return EOF;
+}
