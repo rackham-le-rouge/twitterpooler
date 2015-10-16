@@ -156,7 +156,17 @@ int main(int argc, char** argv)
             "                                 Rev %s\n", rev);
 
 
-    checkConfigurationFiles();
+    if(checkConfigurationFiles() != EXIT_SUCCESS)
+    {
+        LOG_ERROR("Initialisation of the configuration files get back an error. Errno %d. End is near.", errno);
+        return EXIT_FAILURE;
+    }
+    if(initExternalCommunication() != EXIT_SUCCESS)
+    {
+        LOG_ERROR("Initialisation of the communocation system to send back data grabbed failed. Errno %d. End is near.", errno);
+        return EXIT_FAILURE;
+    }
+
     networkLoop();
 
     exit(EXIT_SUCCESS);

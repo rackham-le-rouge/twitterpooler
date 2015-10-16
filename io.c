@@ -1,0 +1,187 @@
+/**
+ * @file        io.c
+ * @program     Twitter pooler to grab crap
+ * @brief       IO header, for read/write on files
+ * @description All functions to read write on the program configuration files
+ * @date        2015 bitch
+ * @licence     Beerware (rev 42)
+ * @author      Jerome GRARD - Not your sister....
+ */
+
+
+#include "config.h"
+
+
+/** @brief
+ * checkIfAFileExist : check existance of a file by trying to opening it
+ * @param p_cFileName : file to test
+ * @return EEXIST if there is a success or -EEXIST in the other case
+ */
+int checkIfAFileExist(const char* p_cFileName)
+{
+    FILE* l_fileFile = NULL;
+
+    if(p_cFileName == NULL)
+    {
+        return -EEXIST;
+    }
+
+    l_fileFile = fopen(p_cFileName, "r");
+    if(l_fileFile == NULL)
+    {
+        return -EEXIST;
+    }
+
+    fclose(l_fileFile);
+
+    return EEXIST;
+}
+
+
+
+/** @brief
+ * Check if you can read & write the file provided as a parameter by trying
+ * to fopen it with w+ mode
+ * @param p_cFileName : name of the file to test
+ * @return EXIT_SUCCESS if success or EXIT_FAILURE in the other cases.
+ */
+int checkReadWriteFile(const char* p_cFileName)
+{
+    FILE* l_fileFile = NULL;
+
+    if(p_cFileName == NULL)
+    {
+        return EXIT_FAILURE;
+    }
+
+    l_fileFile = fopen(p_cFileName, "w+");
+    if(l_fileFile == NULL)
+    {
+        return EXIT_FAILURE;
+    }
+
+    fclose(l_fileFile);
+
+    return EXIT_SUCCESS;
+}
+
+
+
+/** @brief createDirectory
+ * Create a directory
+ * @param p_cName : directory' name
+ * @return EXIT_SUCCESS if success or EXIT_FAILURE in the other cases.
+ */
+int createDirectory(const char* p_cName)
+{
+    LOG_INFO("Going to create directory %s", p_cName);
+    return mkdir(p_cName, 0755);
+}
+
+
+/** @brief
+ * checkConfigurationFiles is the main function to tests all needed files.
+ * that's here we proceed to all calls for checks existance or rights on the needed files.
+ * @return EXIT_SUCCESS if we have all config files and no issues with IO permission. EXIT_FAILURE
+ */
+unsigned int checkConfigurationFiles(void)
+{
+    FILE* l_fileConfigurationFile = NULL;
+    FILE* l_fileEmptyChecksumFile = NULL;
+    char l_cCharacter = 0;
+    char l_sLine[MAX_CONFIG_LINE_LEN];
+    char l_sFileWithCompagnyChecksums[MAX_CONFIG_LINE_LEN];
+    unsigned int l_iCursor = 0;
+
+    /* Doesn't care about the ret code, because EEXIST seems to be K.O, this 
+     * function always send back -1 instead of a smarter code */
+    createDirectory(CHECKSUM_DIRECTORY);
+
+    if(checkIfAFileExist(CONFIGURATION_FILE) != EEXIST)
+    {
+        LOG_ERROR("configuration file %s missing", CONFIGURATION_FILE);
+        return EXIT_FAILURE;
+    }
+
+    l_fileConfigurationFile = fopen(CONFIGURATION_FILE, "r");
+    if(l_fileConfigurationFile == NULL)
+    {
+        return EXIT_FAILURE;
+    }
+
+    while(l_cCharacter != EOF)
+    {
+        l_cCharacter = fgetc(l_fileConfigurationFile);
+
+        /* End of line - Check is we take a compagny name or a keyword */
+        if(l_cCharacter == '\n' || l_iCursor > MAX_CONFIG_LINE_LEN - 1)
+        {
+            if(l_sLine[l_iCursor - 1] == ':')
+            {
+                /* Compagny name on the line */
+
+                /* Remove the 'compagny' marker. It was arbitrary decided */
+                l_sLine[l_iCursor - 1] = '\0';
+                LOG_INFO("Checking compagny %s", l_sLine);
+
+                bzero(l_sFileWithCompagnyChecksums, MAX_CONFIG_LINE_LEN);
+                snprintf(l_sFileWithCompagnyChecksums,
+                        MAX_CONFIG_LINE_LEN,
+                        "%s/%s.md5",
+                        CHECKSUM_DIRECTORY,
+                        l_sLine);
+
+                if(checkIfAFileExist(l_sFileWithCompagnyChecksums) != EEXIST)
+                {
+                    /* Compgany have no checksum file associated */
+                    LOG_WARNING("Compagny %s have no checksum file. First init. Create one.", l_sLine);
+                    l_fileEmptyChecksumFile = fopen(l_sFileWithCompagnyChecksums, "w");
+                    if(l_fileEmptyChecksumFile == NULL)
+                    {
+                        LOG_ERROR("Impossible to create %s", l_sFileWithCompagnyChecksums);
+                        fclose(l_fileConfigurationFile);
+                        return EXIT_FAILURE;
+                    }
+
+                    /* FIXME create here a true fake line */
+                    fprintf(l_fileEmptyChecksumFile, "000\n");
+
+                    fclose(l_fileEmptyChecksumFile);
+                }
+            }
+            else
+            {
+                /* Key words - We don't care here */
+            }
+            bzero(l_sLine, strlen(l_sLine));
+            l_iCursor = 0;
+        }
+        else
+        {
+            l_sLine[l_iCursor++] = l_cCharacter;
+        }
+    }
+
+    fclose(l_fileConfigurationFile);
+
+    return EXIT_SUCCESS;
+}
+
+
+/**
+ * @brief Ths function initialize the way we have to output usefull informations grabbed by this program
+ * @return EXIT_SUCCESS or EXIT_FAILURE
+ */
+int initExternalCommunication(void)
+{
+    int l_iReturnedValue = 0;
+
+    l_iReturnedValue = (mkfifo(PIPE_NAME, 0755) == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+
+    if(l_iReturnedValue == EXIT_FAILURE && errno == 17)     /* FIXME put name of the error */
+    {
+        l_iReturnedValue = EXIT_SUCCESS;
+    }
+
+    return l_iReturnedValue;
+}

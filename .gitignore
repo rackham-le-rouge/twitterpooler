@@ -3,3 +3,6 @@
 asciiart
 follow
 pooler
+checksum/*
+logcat
+pooler.cfg

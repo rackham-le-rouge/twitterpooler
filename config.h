@@ -27,6 +27,8 @@
 #include <curl/curl.h>
 #include <sys/ioctl.h>
 #include <strings.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 /* Some constants */
 #define DEBUG_LEVEL	                    5
@@ -49,6 +51,7 @@
 #define PROGRESS_BAR_BODY_CHARACTER     '-'
 #define PROGRESS_BAR_HEAD_CHARACTER     '>' 
 #define SCREEN_SIZE_COLUMN_MIN          20
+#define PIPE_NAME                       "extractedTwitter"
 
 /* Logic stuff */
 enum boolean
