@@ -82,9 +82,9 @@ int createDirectory(const char* p_cName)
 /** @brief
  * checkConfigurationFiles is the main function to tests all needed files.
  * that's here we proceed to all calls for checks existance or rights on the needed files.
- * @return EXIT_SUCCESS if we have all config files and no issues with IO permission. EXIT_FAILURE
+ * @return If we have all config files and no issues with IO permission returns how many compagnies hold in the configuration file. -EXIT_FAILURE or a negative value if there is any error
  */
-unsigned int checkConfigurationFiles(void)
+int checkConfigurationFiles(void)
 {
     FILE* l_fileConfigurationFile = NULL;
     FILE* l_fileEmptyChecksumFile = NULL;
@@ -92,6 +92,7 @@ unsigned int checkConfigurationFiles(void)
     char l_sLine[MAX_CONFIG_LINE_LEN];
     char l_sFileWithCompagnyChecksums[MAX_CONFIG_LINE_LEN];
     unsigned int l_iCursor = 0;
+    int l_iCompagnyCounter = 0;
 
     /* Doesn't care about the ret code, because EEXIST seems to be K.O, this 
      * function always send back -1 instead of a smarter code */
@@ -100,13 +101,13 @@ unsigned int checkConfigurationFiles(void)
     if(checkIfAFileExist(CONFIGURATION_FILE) != EEXIST)
     {
         LOG_ERROR("configuration file %s missing", CONFIGURATION_FILE);
-        return EXIT_FAILURE;
+        return -EXIT_FAILURE;
     }
 
     l_fileConfigurationFile = fopen(CONFIGURATION_FILE, "r");
     if(l_fileConfigurationFile == NULL)
     {
-        return EXIT_FAILURE;
+        return -EXIT_FAILURE;
     }
 
     while(l_cCharacter != EOF)
@@ -123,6 +124,7 @@ unsigned int checkConfigurationFiles(void)
                 /* Remove the 'compagny' marker. It was arbitrary decided */
                 l_sLine[l_iCursor - 1] = '\0';
                 LOG_INFO("Checking compagny %s", l_sLine);
+                l_iCompagnyCounter++;
 
                 bzero(l_sFileWithCompagnyChecksums, MAX_CONFIG_LINE_LEN);
                 snprintf(l_sFileWithCompagnyChecksums,
@@ -140,7 +142,7 @@ unsigned int checkConfigurationFiles(void)
                     {
                         LOG_ERROR("Impossible to create %s", l_sFileWithCompagnyChecksums);
                         fclose(l_fileConfigurationFile);
-                        return EXIT_FAILURE;
+                        return -EXIT_FAILURE;
                     }
 
                     /* FIXME create here a true fake line */
@@ -164,7 +166,7 @@ unsigned int checkConfigurationFiles(void)
 
     fclose(l_fileConfigurationFile);
 
-    return EXIT_SUCCESS;
+    return l_iCompagnyCounter;
 }
 
 

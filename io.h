@@ -18,7 +18,7 @@
 int checkIfAFileExist(const char* p_cFileName);
 int checkReadWriteFile(const char* p_cFileName);
 int createDirectory(const char* p_cName);
-unsigned int checkConfigurationFiles(void);
+int checkConfigurationFiles(void);
 int initExternalCommunication(void);
 int configurationAnalyseLineByLine(char* p_sCompagny);
 

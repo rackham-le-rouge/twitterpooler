@@ -139,8 +139,12 @@ void printProgressBar(unsigned int p_iMax, unsigned int p_iCurrentValue, char* p
  */
 int main(int argc, char** argv)
 {
+    int l_iHowManyCompagnies;
+
     UNUSED(argc);
     UNUSED(argv);
+
+    l_iHowManyCompagnies = 0;
 
     srand(time(NULL));
 
@@ -156,7 +160,8 @@ int main(int argc, char** argv)
             "                                 Rev %s\n", rev);
 
 
-    if(checkConfigurationFiles() != EXIT_SUCCESS)
+    l_iHowManyCompagnies = checkConfigurationFiles();
+    if(l_iHowManyCompagnies < 0)
     {
         LOG_ERROR("Initialisation of the configuration files get back an error. Errno %d. End is near.", errno);
         return EXIT_FAILURE;
@@ -167,7 +172,7 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
-    networkLoop();
+    networkLoop(l_iHowManyCompagnies);
 
     exit(EXIT_SUCCESS);
     return EXIT_SUCCESS;	

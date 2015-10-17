@@ -101,17 +101,32 @@ void* threadPagePooling(void* p_structInitData)
 
 
 
-void networkLoop(void)
+void networkLoop(int p_iHowManyCompagnies)
 {
     struct MemoryStruct l_structMemory;
-    structPagePoolingInitData l_structPagePoolingInitInformation[20];  /* FIXME make a more smart system */
+    structPagePoolingInitData* l_structPagePoolingInitInformation;
     int l_iReturnedValue;
     int l_iThreadNumber;
     char l_sCompagnyName[MAX_CONFIG_LINE_LEN];
-    pthread_t l_structPagePoolingThreadID[20];          /* FIXME make a more smart system */
+    pthread_t* l_structPagePoolingThreadID;
 
     UNUSED(l_structMemory);
+    l_structPagePoolingInitInformation = (structPagePoolingInitData*)malloc(p_iHowManyCompagnies * sizeof(structPagePoolingInitData));
+    l_structPagePoolingThreadID = (pthread_t*)malloc(p_iHowManyCompagnies * sizeof(pthread_t));
+
+    if(l_structPagePoolingInitInformation == NULL)
+    {
+        LOG_ERROR("Not enouth memory available. errno %d", errno);
+        exit(ENOMEM);
+    }
+    if(l_structPagePoolingThreadID == NULL)
+    {
+        LOG_ERROR("Not enouth memory available, errno %d", errno);
+        exit(ENOMEM);
+    }
+
     l_iThreadNumber = 0;
+    LOG_INFO("Going to generate %d threads", p_iHowManyCompagnies);
 
     do
     {
@@ -121,8 +136,8 @@ void networkLoop(void)
         if(l_iReturnedValue == EXIT_SUCCESS)
         {
             /* We have a valid name */
-            strcpy(l_structPagePoolingInitInformation[l_iThreadNumber].sName, l_sCompagnyName);
-            LOG_INFO("Start thread for %s", l_structPagePoolingInitInformation[l_iThreadNumber].sName);
+            strcpy((l_structPagePoolingInitInformation + l_iThreadNumber)->sName, l_sCompagnyName);
+            LOG_INFO("Start thread for %s", (l_structPagePoolingInitInformation + l_iThreadNumber)->sName);
             if(pthread_create(  l_structPagePoolingThreadID + l_iThreadNumber,
                                 NULL,
                                 threadPagePooling,
