@@ -95,7 +95,7 @@ int retrieveAnUrl(const char* p_cUrlToGet, struct MemoryStruct* p_structMemory)
 void* threadPagePooling(void* p_structInitData)
 {
     structPagePoolingInitData* l_structInitData = (structPagePoolingInitData*)p_structInitData;
-    /*LOG_INFO("Cpy name %s", l_structInitData->sName);*/
+    LOG_INFO("Thread for %s started.", l_structInitData->sName);
     return NULL;
 }
 
@@ -107,6 +107,8 @@ void networkLoop(int p_iHowManyCompagnies)
     structPagePoolingInitData* l_structPagePoolingInitInformation;
     int l_iReturnedValue;
     int l_iThreadNumber;
+    int l_iIterator;
+    int l_iReturnedThreadValue[2][2];   /* FIXME */
     char l_sCompagnyName[MAX_CONFIG_LINE_LEN];
     pthread_t* l_structPagePoolingThreadID;
 
@@ -157,6 +159,24 @@ void networkLoop(int p_iHowManyCompagnies)
             break;
         }
     }while(l_iReturnedValue != EOF);
+
+
+    LOG_INFO("Thread starting is OK. %d threads pushed", p_iHowManyCompagnies);
+    for(l_iIterator = 0; l_iIterator < p_iHowManyCompagnies; l_iIterator++)
+    {
+        if(*(l_structPagePoolingThreadID + l_iIterator) != 0)
+        {
+            if(pthread_join(*(l_structPagePoolingThreadID + l_iIterator), (void**)&l_iReturnedThreadValue) != 0)
+            {
+                LOG_ERROR("Error on pthread_joined, errno %d", errno);
+            }
+            else
+            {
+                *(l_structPagePoolingThreadID + l_iIterator) = 0;
+            }
+        }
+    }
+
 }
 
 

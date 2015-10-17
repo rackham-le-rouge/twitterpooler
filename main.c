@@ -173,7 +173,6 @@ int main(int argc, char** argv)
     }
 
     networkLoop(l_iHowManyCompagnies);
-
     exit(EXIT_SUCCESS);
     return EXIT_SUCCESS;	
 
