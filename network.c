@@ -91,16 +91,32 @@ int retrieveAnUrl(const char* p_cUrlToGet, struct MemoryStruct* p_structMemory)
 }
 
 
-
-void* threadPagePooling(void* p_structInitData)
+/**
+ *@brief The pooling thread. This thread receive a page to pool, and loop on this action. Retrieve the page, analyse it
+ *  find new results, send them to the main thread.
+ *@param p_structInitData : a parameter of type structPagePoolingInitData to provide all informations and memory address pointers needed by this thread
+ *@return with the function pthread_exit an exit code
+ */
+void* threadPagePooling (void* p_structInitData)
 {
     structPagePoolingInitData* l_structInitData = (structPagePoolingInitData*)p_structInitData;
+    int* l_iReturnValue;
+
     LOG_INFO("Thread for %s started.", l_structInitData->sName);
-    return NULL;
+    l_iReturnValue = (int*)malloc(sizeof(int));
+    *l_iReturnValue = 314;              /* Test value */
+
+    pthread_exit(l_iReturnValue);
 }
 
 
-
+/**
+ * @brief This function is the main loop for the network function. This function starts all threads for all pages to follow, and wait
+ *  for the end of their execution. This function call a parse function to find the name of the page to follow, and gives all parameters
+ *  to the pooling thread.
+ * @param p_iHowManyCompagnies : number of pages to follow, so, number of threads to start
+ * @return nothing yet
+ */
 void networkLoop(int p_iHowManyCompagnies)
 {
     struct MemoryStruct l_structMemory;
@@ -108,13 +124,14 @@ void networkLoop(int p_iHowManyCompagnies)
     int l_iReturnedValue;
     int l_iThreadNumber;
     int l_iIterator;
-    int l_iReturnedThreadValue[2][2];   /* FIXME */
+    int* l_iReturnedThreadValue;
     char l_sCompagnyName[MAX_CONFIG_LINE_LEN];
     pthread_t* l_structPagePoolingThreadID;
 
     UNUSED(l_structMemory);
     l_structPagePoolingInitInformation = (structPagePoolingInitData*)malloc(p_iHowManyCompagnies * sizeof(structPagePoolingInitData));
     l_structPagePoolingThreadID = (pthread_t*)malloc(p_iHowManyCompagnies * sizeof(pthread_t));
+    l_iReturnedThreadValue = NULL;
 
     if(l_structPagePoolingInitInformation == NULL)
     {
@@ -130,6 +147,9 @@ void networkLoop(int p_iHowManyCompagnies)
     l_iThreadNumber = 0;
     LOG_INFO("Going to generate %d threads", p_iHowManyCompagnies);
 
+
+
+    /* Analyse the configuration file, find page's name, and start one thread per page */
     do
     {
         bzero(l_sCompagnyName, MAX_CONFIG_LINE_LEN);
@@ -161,22 +181,26 @@ void networkLoop(int p_iHowManyCompagnies)
     }while(l_iReturnedValue != EOF);
 
 
+
+
+
+    /* Wait for the end of all pooling threads */
     LOG_INFO("Thread starting is OK. %d threads pushed", p_iHowManyCompagnies);
     for(l_iIterator = 0; l_iIterator < p_iHowManyCompagnies; l_iIterator++)
     {
         if(*(l_structPagePoolingThreadID + l_iIterator) != 0)
         {
-            if(pthread_join(*(l_structPagePoolingThreadID + l_iIterator), (void**)&l_iReturnedThreadValue) != 0)
+            if(pthread_join(*(l_structPagePoolingThreadID + l_iIterator), (void*)&l_iReturnedThreadValue) != 0)
             {
                 LOG_ERROR("Error on pthread_joined, errno %d", errno);
             }
             else
             {
+                LOG_INFO("Returned value for %d is %d", l_iIterator, *l_iReturnedThreadValue);
                 *(l_structPagePoolingThreadID + l_iIterator) = 0;
             }
         }
     }
-
 }
 
 

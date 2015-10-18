@@ -13,7 +13,7 @@
 
 size_t writeMemoryCallback(void* p_contents, size_t p_size, size_t nmemb, void* p_data);
 int retrieveAnUrl(const char* p_cUrlToGet, struct MemoryStruct* p_structMemory);
-void* threadPagePooling(void* p_structInitData);
+void* threadPagePooling(void* p_structInitData) __attribute__((noreturn));
 void networkLoop(int p_iHowManyCompagnies);
 
 
