@@ -34,11 +34,9 @@
 /* Some constants */
 #define DEBUG_LEVEL	                    5
 #define URL_LENGTH                      9 /* At least add 1 to the real URL lenght for the \0 */
-#define URL_INDEX_OF_NEW                "http://pastebin.com/archive"
-#define URL_PREFIX                      "http://pastebin.com/"
-#define TOKEN_DELIMITER_FOR_NEW_ENTRIES "border=\"0\" /><a href=\"/"
-#define TOKEN_DELIMITER_FOR_DATA_START  "onkeydown=\"return catchTab(this,event)\">"
-#define TOKEN_DELIMITER_FOR_DATA_END    "</textarea>"
+#define URL_PREFIX                      "https://twitter.com/"
+#define TOKEN_DELIMITER_FOR_DATA_START  "js-tweet-text tweet-text\""
+#define TOKEN_DELIMITER_FOR_DATA_END    "</p>"
 #define CHECKSUM_DIRECTORY              "checksum"
 #define CONFIGURATION_FILE              "pooler.cfg"
 #define WAIT_TIME_MAX                   15

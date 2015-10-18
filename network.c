@@ -100,9 +100,11 @@ int retrieveAnUrl(const char* p_cUrlToGet, struct MemoryStruct* p_structMemory)
 void* threadPagePooling (void* p_structInitData)
 {
     structPagePoolingInitData* l_structInitData = (structPagePoolingInitData*)p_structInitData;
+    struct MemoryStruct l_structMemory;
     int* l_iReturnValue;
 
     LOG_INFO("Thread for %s started.", l_structInitData->sName);
+    UNUSED(l_structMemory);
     l_iReturnValue = (int*)malloc(sizeof(int));
     *l_iReturnValue = 314;              /* Test value */
 
@@ -119,7 +121,6 @@ void* threadPagePooling (void* p_structInitData)
  */
 void networkLoop(int p_iHowManyCompagnies)
 {
-    struct MemoryStruct l_structMemory;
     structPagePoolingInitData* l_structPagePoolingInitInformation;
     int l_iReturnedValue;
     int l_iThreadNumber;
@@ -128,7 +129,6 @@ void networkLoop(int p_iHowManyCompagnies)
     char l_sCompagnyName[MAX_CONFIG_LINE_LEN];
     pthread_t* l_structPagePoolingThreadID;
 
-    UNUSED(l_structMemory);
     l_structPagePoolingInitInformation = (structPagePoolingInitData*)malloc(p_iHowManyCompagnies * sizeof(structPagePoolingInitData));
     l_structPagePoolingThreadID = (pthread_t*)malloc(p_iHowManyCompagnies * sizeof(pthread_t));
     l_iReturnedThreadValue = NULL;
