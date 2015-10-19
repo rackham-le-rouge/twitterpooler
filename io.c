@@ -178,7 +178,7 @@ int initExternalCommunication(void)
 {
     int l_iReturnedValue = 0;
 
-    l_iReturnedValue = (mkfifo(PIPE_NAME, 0755) == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+    l_iReturnedValue = (mkfifo(PIPE_NAME, S_IRUSR | S_IWUSR) == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 
     if(l_iReturnedValue == EXIT_FAILURE && errno == 17)     /* FIXME put name of the error */
     {
