@@ -75,7 +75,7 @@ int checkReadWriteFile(const char* p_cFileName)
 int createDirectory(const char* p_cName)
 {
     LOG_INFO("Going to create directory %s", p_cName);
-    return mkdir(p_cName, 0755);
+    return mkdir(p_cName, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH | S_IXUSR);
 }
 
 
@@ -178,7 +178,7 @@ int initExternalCommunication(void)
 {
     int l_iReturnedValue = 0;
 
-    l_iReturnedValue = (mkfifo(PIPE_NAME, S_IRUSR | S_IWUSR) == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+    l_iReturnedValue = (mkfifo(PIPE_NAME, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH | S_IXUSR) == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 
     if(l_iReturnedValue == EXIT_FAILURE && errno == EEXIST)
     {
