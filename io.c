@@ -180,7 +180,7 @@ int initExternalCommunication(void)
 
     l_iReturnedValue = (mkfifo(PIPE_NAME, S_IRUSR | S_IWUSR) == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 
-    if(l_iReturnedValue == EXIT_FAILURE && errno == 17)     /* FIXME put name of the error */
+    if(l_iReturnedValue == EXIT_FAILURE && errno == EEXIST)
     {
         l_iReturnedValue = EXIT_SUCCESS;
     }
