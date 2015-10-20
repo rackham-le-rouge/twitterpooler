@@ -182,14 +182,15 @@ MD5_Final(l_iMD5Output, &l_structMD5Context);
                 sprintf(&l_sMD5Hash[l_iIterator * 2], "%02x", (unsigned int)l_iMD5Output[l_iIterator]);
             }
 
-            LOG_INFO("md5out: %s", l_sMD5Hash);
-
             /*****************
             *
             *  MD5Quote save
             *
             *****************/
-            updateAndReadChecksumFile(l_structInitData->sName, l_sMD5Hash, UPDATE);
+            if(updateAndReadChecksumFile(l_structInitData->sName, l_sMD5Hash, CHECK_EXIST) != 1)
+            {
+                updateAndReadChecksumFile(l_structInitData->sName, l_sMD5Hash, UPDATE);
+            }
 
  
             /*****************
