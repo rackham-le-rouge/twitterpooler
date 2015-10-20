@@ -74,6 +74,13 @@ struct PagePoolingInitData {
 
 typedef struct PagePoolingInitData structPagePoolingInitData;
 
+enum checksumFileAction
+{
+    INIT,
+    UPDATE,
+    CHECK_EXIST,
+    CLOSE
+};
 
 /* Debug part */
 #define UNUSED(x) (void)(x)

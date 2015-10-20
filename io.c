@@ -145,8 +145,8 @@ int checkConfigurationFiles(void)
                         return -EXIT_FAILURE;
                     }
 
-                    /* FIXME create here a true fake line */
-                    fprintf(l_fileEmptyChecksumFile, "000\n");
+                    /* Create here a true fake line */
+                    fprintf(l_fileEmptyChecksumFile, "00000000000000000000000000000000\n");
 
                     fclose(l_fileEmptyChecksumFile);
                 }
@@ -236,7 +236,7 @@ int configurationAnalyseLineByLine(char* p_sCompagny)
             }
             else
             {
-                /* We founf keywords, clean the line and start another */
+                /* We found keywords, clean the line and start another */
                 bzero(l_sLine, strlen(l_sLine));
                 l_iCursor = 0;
             }
@@ -250,4 +250,61 @@ int configurationAnalyseLineByLine(char* p_sCompagny)
     fclose(l_fileConfigurationFile);
 
     return EOF;
+}
+
+
+
+
+
+void updateAndReadChecksumFile(char* p_sName, char* p_sMD5Hash, enum checksumFileAction p_enumAction)
+{
+    static FILE* l_fileChecksum = NULL;
+    static char l_sFileName[MAX_CONFIG_LINE_LEN];
+    int l_iRetCode;
+
+    l_iRetCode = 0;
+
+    /* If we want to use a un-initialized file */
+    if(p_enumAction != INIT && l_fileChecksum == NULL)
+    {
+        LOG_WARNING("Try to do action %d but no INIT have be done before...", p_enumAction);
+        return;
+    }
+
+    switch(p_enumAction)
+    {
+        case INIT:
+            snprintf(l_sFileName, MAX_CONFIG_LINE_LEN, "%s/%s.md5", CHECKSUM_DIRECTORY, p_sName);
+            l_fileChecksum = fopen(l_sFileName, "w+");
+            if(l_fileChecksum == NULL)
+            {
+                LOG_ERROR("File %s impossible to open. No actions on it.", l_sFileName);
+            }
+            else
+            {
+                LOG_INFO("File %s correctlly opened.", l_sFileName);
+            }
+            break;
+
+        case UPDATE:
+            LOG_INFO("Add [%s]", p_sMD5Hash);
+            fprintf(l_fileChecksum, "%s\n", p_sMD5Hash);
+            break;
+
+        case CHECK_EXIST:
+            /* FIXME */
+            break;
+
+        case CLOSE:
+            l_iRetCode = fclose(l_fileChecksum);
+            if(l_iRetCode != 0)
+            {
+                LOG_ERROR("fclose failed. File still open for %s, errno is %d", l_sFileName, errno);
+            }
+            break;
+
+        default:
+            LOG_WARNING("This action doen't exist : %d", p_enumAction);
+            break;
+    }
 }

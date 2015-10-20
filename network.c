@@ -116,7 +116,9 @@ void* threadPagePooling (void* p_structInitData)
     l_sUrl = (char*)malloc(MAX_CONFIG_LINE_LEN * sizeof(char));
     l_sCursor = NULL;
     l_sQuote = NULL;
+
     MD5_Init(&l_structMD5Context);
+    updateAndReadChecksumFile(l_structInitData->sName, NULL, INIT);
 
     if( l_iReturnValue == NULL ||
         l_sUrl == NULL)
@@ -184,6 +186,14 @@ MD5_Final(l_iMD5Output, &l_structMD5Context);
 
             /*****************
             *
+            *  MD5Quote save
+            *
+            *****************/
+            updateAndReadChecksumFile(l_structInitData->sName, l_sMD5Hash, UPDATE);
+
+ 
+            /*****************
+            *
             *  Quote erase
             *
             *****************/
@@ -196,6 +206,7 @@ MD5_Final(l_iMD5Output, &l_structMD5Context);
         LOG_INFO("Page %s NOT retrieved. Network error.", l_sUrl);
     }
 
+    updateAndReadChecksumFile(l_structInitData->sName, NULL, CLOSE);
     *l_iReturnValue = 314;              /* Test value */
 
 

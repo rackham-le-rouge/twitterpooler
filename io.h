@@ -21,6 +21,7 @@ int createDirectory(const char* p_cName);
 int checkConfigurationFiles(void);
 int initExternalCommunication(void);
 int configurationAnalyseLineByLine(char* p_sCompagny);
+void updateAndReadChecksumFile(char* l_sName, char* p_sMD5Hash, enum checksumFileAction p_enumAction);
 
 
 
