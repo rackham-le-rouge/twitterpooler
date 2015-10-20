@@ -30,6 +30,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <pthread.h>
+#include <openssl/md5.h>
 
 /* Some constants */
 #define DEBUG_LEVEL	                    5
@@ -73,6 +74,13 @@ struct PagePoolingInitData {
 
 typedef struct PagePoolingInitData structPagePoolingInitData;
 
+enum checksumFileAction
+{
+    INIT,
+    UPDATE,
+    CHECK_EXIST,
+    CLOSE
+};
 
 /* Debug part */
 #define UNUSED(x) (void)(x)

@@ -145,8 +145,8 @@ int checkConfigurationFiles(void)
                         return -EXIT_FAILURE;
                     }
 
-                    /* FIXME create here a true fake line */
-                    fprintf(l_fileEmptyChecksumFile, "000\n");
+                    /* Create here a true fake line */
+                    fprintf(l_fileEmptyChecksumFile, "00000000000000000000000000000000\n");
 
                     fclose(l_fileEmptyChecksumFile);
                 }
@@ -236,7 +236,7 @@ int configurationAnalyseLineByLine(char* p_sCompagny)
             }
             else
             {
-                /* We founf keywords, clean the line and start another */
+                /* We found keywords, clean the line and start another */
                 bzero(l_sLine, strlen(l_sLine));
                 l_iCursor = 0;
             }
@@ -250,4 +250,92 @@ int configurationAnalyseLineByLine(char* p_sCompagny)
     fclose(l_fileConfigurationFile);
 
     return EOF;
+}
+
+
+
+
+/**
+ * @brief This function manage all the I/O of a thread to its assigned checksum file.
+ * A checksum file (.md5) hold all md5 of all already known messages, if a md5 isn't here it is
+ * because the message a new one. With this function, you can open the file, check if a md5
+ * is in, append a new md5 at the end and close the file. You have to open the file once, at
+ * the thread's starts and close once too at the thread's closing.
+ * @param p_sName : name of the page pooled by the thread
+ * @param p_sMD5Hash : string with the md5sum in it (already converted in letters. You don't have to put a value when p_enumAction equals INIT or CLOSE
+ * @param p_enumAction : the wanted action, INIT to init the file descriptor etc.. Cf enum checksumFileAction
+ * @return 0 in all cases, and if p_enumAction equals CHECK_EXIST this function returns 1 if the p_sMD5Hash is already in the file and 0 if this p_sMD5Hash is unknown
+ */
+int updateAndReadChecksumFile(char* p_sName, char* p_sMD5Hash, enum checksumFileAction p_enumAction)
+{
+    static FILE* l_fileChecksum = NULL;
+    static char l_sFileName[MAX_CONFIG_LINE_LEN];
+    char l_sReadLine[34];       /* 33 + 1 EOL */
+    int l_iRetCode;
+
+    l_iRetCode = 0;
+    bzero(l_sReadLine, 34);
+
+    /* If we want to use a un-initialized file */
+    if(p_enumAction != INIT && l_fileChecksum == NULL)
+    {
+        LOG_WARNING("Try to do action %d but no INIT have be done before...", p_enumAction);
+        return 0;
+    }
+
+
+    /* Classical actions, described in the enum structure */
+    switch(p_enumAction)
+    {
+        /* To call once at the first usage of this function */
+        case INIT:
+            snprintf(l_sFileName, MAX_CONFIG_LINE_LEN, "%s/%s.md5", CHECKSUM_DIRECTORY, p_sName);
+            l_fileChecksum = fopen(l_sFileName, "a+");
+            if(l_fileChecksum == NULL)
+            {
+                LOG_ERROR("File %s impossible to open. No actions on it.", l_sFileName);
+            }
+            else
+            {
+                LOG_INFO("File %s correctlly opened.", l_sFileName);
+            }
+            break;
+
+        /* you have to check if the p_sMD5Hash is already present in the file, this action
+         * just append p_sMD5Hash to the end of the file */
+        case UPDATE:
+            LOG_INFO("Add [%s]", p_sMD5Hash);
+            fseek (l_fileChecksum, 0, SEEK_END);
+            fprintf(l_fileChecksum, "%s\n", p_sMD5Hash);
+            break;
+
+        /* Check if p_sMD5Hash is already in the file, read all the file. This function may
+         * be greedy, if there is too many disk access we have to fix this FIXME */
+        case CHECK_EXIST:
+            fseek (l_fileChecksum, 0, SEEK_SET);
+            do
+            {
+                fgets(l_sReadLine, MAX_CONFIG_LINE_LEN, l_fileChecksum);
+                if(strstr(l_sReadLine, p_sMD5Hash) != NULL)
+                {
+                    return 1;
+                }
+            }while(!feof(l_fileChecksum));
+            break;
+
+        /* Call when the thread is going to close */
+        case CLOSE:
+            l_iRetCode = fclose(l_fileChecksum);
+            if(l_iRetCode != 0)
+            {
+                LOG_ERROR("fclose failed. File still open for %s, errno is %d", l_sFileName, errno);
+            }
+            break;
+
+        default:
+            LOG_WARNING("This action doen't exist : %d", p_enumAction);
+            break;
+    }
+
+    return 0;
 }
