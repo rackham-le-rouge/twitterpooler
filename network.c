@@ -100,11 +100,15 @@ int retrieveAnUrl(const char* p_cUrlToGet, struct MemoryStruct* p_structMemory)
 void* threadPagePooling (void* p_structInitData)
 {
     structPagePoolingInitData* l_structInitData = (structPagePoolingInitData*)p_structInitData;
+    MD5_CTX l_structMD5Context;
     struct MemoryStruct l_structMemory;
     char* l_sUrl;
     char* l_sCursor;
     char* l_sQuote;
     int* l_iReturnValue;
+    int l_iIterator;
+    char l_sMD5Hash[33];
+    unsigned char l_iMD5Output[16];     /* Declared as an array of bytes */
 
     LOG_INFO("Thread for %s started.", l_structInitData->sName);
 
@@ -112,6 +116,7 @@ void* threadPagePooling (void* p_structInitData)
     l_sUrl = (char*)malloc(MAX_CONFIG_LINE_LEN * sizeof(char));
     l_sCursor = NULL;
     l_sQuote = NULL;
+    MD5_Init(&l_structMD5Context);
 
     if( l_iReturnValue == NULL ||
         l_sUrl == NULL)
@@ -120,6 +125,24 @@ void* threadPagePooling (void* p_structInitData)
         pthread_exit(l_iReturnValue);
     }
 
+/*
+strcpy(l_sMD5Input, "emmamandin");
+
+MD5_Update(&l_structMD5Context, l_sMD5Input, strlen(l_sMD5Input));
+MD5_Final(l_iMD5Output, &l_structMD5Context);
+
+for(l_iIterator = 0; l_iIterator < 16; ++l_iIterator)
+{
+    sprintf(&l_sMD5Hash[l_iIterator * 2], "%02x", (unsigned int)l_iMD5Output[l_iIterator]);
+}
+
+LOG_INFO("md5out: %s", l_sMD5Hash);
+MD5_Final(l_iMD5Output, &l_structMD5Context);
+*/
+
+
+
+    /* URL creation for this thread - This thread is only going to pool this URL */
     snprintf(l_sUrl, MAX_CONFIG_LINE_LEN, "%s/%s", URL_PREFIX, l_structInitData->sName);
     if(retrieveAnUrl(l_sUrl, &l_structMemory) == EXIT_SUCCESS)
     {
@@ -127,6 +150,11 @@ void* threadPagePooling (void* p_structInitData)
 
         while(strstr(l_structMemory.memory, TOKEN_DELIMITER_FOR_DATA_START) != NULL)
         {
+            /*****************
+            *
+            * Quote retrieving
+            *
+            *****************/
             /* Find token and remove starting point */
             l_sQuote = strstr(l_structMemory.memory, TOKEN_DELIMITER_FOR_DATA_START);
             memset(l_sQuote, ' ', strlen(TOKEN_DELIMITER_FOR_DATA_START));
@@ -139,6 +167,26 @@ void* threadPagePooling (void* p_structInitData)
             /* Here, line is in l_sQuote, until the \0 character. And end of the line is at l_sCursor */
             LOG_INFO("Token [%s]", l_sQuote);
 
+            /*****************
+            *
+            * MD5 of the quote
+            *
+            *****************/
+            MD5_Update(&l_structMD5Context, l_sQuote, strlen(l_sQuote));
+            MD5_Final(l_iMD5Output, &l_structMD5Context);
+
+            for(l_iIterator = 0; l_iIterator < 16; ++l_iIterator)
+            {
+                sprintf(&l_sMD5Hash[l_iIterator * 2], "%02x", (unsigned int)l_iMD5Output[l_iIterator]);
+            }
+
+            LOG_INFO("md5out: %s", l_sMD5Hash);
+
+            /*****************
+            *
+            *  Quote erase
+            *
+            *****************/
             /* Remove end of line marker */
             memset(l_sCursor, ' ', strlen(TOKEN_DELIMITER_FOR_DATA_END));
         }
