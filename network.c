@@ -101,12 +101,26 @@ void* threadPagePooling (void* p_structInitData)
 {
     structPagePoolingInitData* l_structInitData = (structPagePoolingInitData*)p_structInitData;
     struct MemoryStruct l_structMemory;
+    char* l_sUrl;
     int* l_iReturnValue;
 
     LOG_INFO("Thread for %s started.", l_structInitData->sName);
     UNUSED(l_structMemory);
     l_iReturnValue = (int*)malloc(sizeof(int));
+    l_sUrl = (char*)malloc(MAX_CONFIG_LINE_LEN * sizeof(char));
+
+    if( l_iReturnValue == NULL ||
+        l_sUrl == NULL)
+    {
+        LOG_ERROR("Not enought memory avilable. Abort. errno %d", errno);
+        pthread_exit(l_iReturnValue);
+    }
+
+
     *l_iReturnValue = 314;              /* Test value */
+
+
+    free(l_sUrl);
 
     pthread_exit(l_iReturnValue);
 }
@@ -198,6 +212,9 @@ void networkLoop(int p_iHowManyCompagnies)
             {
                 LOG_INFO("Returned value for %d is %d", l_iIterator, *l_iReturnedThreadValue);
                 *(l_structPagePoolingThreadID + l_iIterator) = 0;
+
+                /* release memory declared in the thread */
+                free(l_iReturnedThreadValue);
             }
         }
     }
