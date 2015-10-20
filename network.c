@@ -102,12 +102,16 @@ void* threadPagePooling (void* p_structInitData)
     structPagePoolingInitData* l_structInitData = (structPagePoolingInitData*)p_structInitData;
     struct MemoryStruct l_structMemory;
     char* l_sUrl;
+    char* l_sCursor;
+    char* l_sQuote;
     int* l_iReturnValue;
 
     LOG_INFO("Thread for %s started.", l_structInitData->sName);
-    UNUSED(l_structMemory);
+
     l_iReturnValue = (int*)malloc(sizeof(int));
     l_sUrl = (char*)malloc(MAX_CONFIG_LINE_LEN * sizeof(char));
+    l_sCursor = NULL;
+    l_sQuote = NULL;
 
     if( l_iReturnValue == NULL ||
         l_sUrl == NULL)
@@ -116,6 +120,33 @@ void* threadPagePooling (void* p_structInitData)
         pthread_exit(l_iReturnValue);
     }
 
+    snprintf(l_sUrl, MAX_CONFIG_LINE_LEN, "%s/%s", URL_PREFIX, l_structInitData->sName);
+    if(retrieveAnUrl(l_sUrl, &l_structMemory) == EXIT_SUCCESS)
+    {
+        LOG_INFO("Page %s retrieved. Bytes %d", l_sUrl, l_structMemory.size);
+
+        while(strstr(l_structMemory.memory, TOKEN_DELIMITER_FOR_DATA_START) != NULL)
+        {
+            /* Find token and remove starting point */
+            l_sQuote = strstr(l_structMemory.memory, TOKEN_DELIMITER_FOR_DATA_START);
+            memset(l_sQuote, ' ', strlen(TOKEN_DELIMITER_FOR_DATA_START));
+
+            /* Prepare the line, starting and end of it */
+            l_sQuote = strstr(l_sQuote, ">") + 1;
+            l_sCursor = strstr(l_sQuote, TOKEN_DELIMITER_FOR_DATA_END);
+            memset(l_sCursor, '\0', strlen(TOKEN_DELIMITER_FOR_DATA_END));
+
+            /* Here, line is in l_sQuote, until the \0 character. And end of the line is at l_sCursor */
+            LOG_INFO("Token [%s]", l_sQuote);
+
+            /* Remove end of line marker */
+            memset(l_sCursor, ' ', strlen(TOKEN_DELIMITER_FOR_DATA_END));
+        }
+    }
+    else
+    {
+        LOG_INFO("Page %s NOT retrieved. Network error.", l_sUrl);
+    }
 
     *l_iReturnValue = 314;              /* Test value */
 
