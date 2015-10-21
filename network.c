@@ -101,6 +101,7 @@ void* threadPagePooling (void* p_structInitData)
 {
     structPagePoolingInitData* l_structInitData = (structPagePoolingInitData*)p_structInitData;
     MD5_CTX l_structMD5Context;
+    FILE* l_fileChecksum;
     struct MemoryStruct l_structMemory;
     char* l_sUrl;
     char* l_sCursor;
@@ -116,9 +117,10 @@ void* threadPagePooling (void* p_structInitData)
     l_sUrl = (char*)malloc(MAX_CONFIG_LINE_LEN * sizeof(char));
     l_sCursor = NULL;
     l_sQuote = NULL;
+    l_fileChecksum = NULL;
 
     MD5_Init(&l_structMD5Context);
-    updateAndReadChecksumFile(l_structInitData->sName, NULL, INIT);
+    updateAndReadChecksumFile(l_structInitData->sName, NULL, INIT, &l_fileChecksum);
 
     if( l_iReturnValue == NULL ||
         l_sUrl == NULL)
@@ -170,9 +172,9 @@ void* threadPagePooling (void* p_structInitData)
             *  MD5Quote save
             *
             *****************/
-            if(updateAndReadChecksumFile(l_structInitData->sName, l_sMD5Hash, CHECK_EXIST) != 1)
+            if(updateAndReadChecksumFile(l_structInitData->sName, l_sMD5Hash, CHECK_EXIST, &l_fileChecksum) != 1)
             {
-                updateAndReadChecksumFile(l_structInitData->sName, l_sMD5Hash, UPDATE);
+                updateAndReadChecksumFile(l_structInitData->sName, l_sMD5Hash, UPDATE, &l_fileChecksum);
             }
 
  
@@ -190,7 +192,7 @@ void* threadPagePooling (void* p_structInitData)
         LOG_INFO("Page %s NOT retrieved. Network error.", l_sUrl);
     }
 
-    updateAndReadChecksumFile(l_structInitData->sName, NULL, CLOSE);
+    updateAndReadChecksumFile(l_structInitData->sName, NULL, CLOSE, &l_fileChecksum);
     *l_iReturnValue = 314;              /* Test value */
 
 
