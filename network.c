@@ -177,6 +177,13 @@ void* threadPagePooling (void* p_structInitData)
                 updateAndReadChecksumFile(l_structInitData->sName, l_sMD5Hash, UPDATE, &l_fileChecksum);
             }
 
+            /*****************
+            *
+            *  Clean the HTML
+            *
+            *****************/
+            convertHTML2ASCII(l_sQuote);
+            LOG_INFO("Token clean [%s]", l_sQuote);
  
             /*****************
             *
