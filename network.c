@@ -152,7 +152,7 @@ void* threadPagePooling (void* p_structInitData)
             memset(l_sCursor, '\0', strlen(TOKEN_DELIMITER_FOR_DATA_END));
 
             /* Here, line is in l_sQuote, until the \0 character. And end of the line is at l_sCursor */
-            LOG_INFO("Token [%s]", l_sQuote);
+            /*LOG_INFO("Token [%s]", l_sQuote);*/
 
             /*****************
             *
@@ -183,7 +183,8 @@ void* threadPagePooling (void* p_structInitData)
             *
             *****************/
             convertHTML2ASCII(l_sQuote);
-            LOG_INFO("Token clean [%s]", l_sQuote);
+            removeHTMLContent(l_sQuote);
+            LOG_INFO("Token [%s]", l_sQuote);
  
             /*****************
             *
