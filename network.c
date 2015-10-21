@@ -127,23 +127,6 @@ void* threadPagePooling (void* p_structInitData)
         pthread_exit(l_iReturnValue);
     }
 
-/*
-strcpy(l_sMD5Input, "emmamandin");
-
-MD5_Update(&l_structMD5Context, l_sMD5Input, strlen(l_sMD5Input));
-MD5_Final(l_iMD5Output, &l_structMD5Context);
-
-for(l_iIterator = 0; l_iIterator < 16; ++l_iIterator)
-{
-    sprintf(&l_sMD5Hash[l_iIterator * 2], "%02x", (unsigned int)l_iMD5Output[l_iIterator]);
-}
-
-LOG_INFO("md5out: %s", l_sMD5Hash);
-MD5_Final(l_iMD5Output, &l_structMD5Context);
-*/
-
-
-
     /* URL creation for this thread - This thread is only going to pool this URL */
     snprintf(l_sUrl, MAX_CONFIG_LINE_LEN, "%s/%s", URL_PREFIX, l_structInitData->sName);
     if(retrieveAnUrl(l_sUrl, &l_structMemory) == EXIT_SUCCESS)
