@@ -19,14 +19,19 @@
  */
 void convertHTML2ASCII(char* p_sString)
 {
-    char l_sFinal[MAX_CONFIG_LINE_LEN];
+    char* l_sFinal;
     int l_iCursorI;
     int l_iCursorF;
     int l_iCursorC;
     int l_iLen;
 
-    bzero(l_sFinal, MAX_CONFIG_LINE_LEN);       /* FIXME */
     l_iLen = strlen(p_sString);
+    l_sFinal = (char*)malloc(l_iLen * sizeof(char));
+    if(l_sFinal == NULL)
+    {
+        return;
+    }
+    bzero(l_sFinal, l_iLen);
     l_iCursorI = 0;
     l_iCursorF = 0;
     l_iCursorC = 0;
@@ -67,6 +72,7 @@ void convertHTML2ASCII(char* p_sString)
     }
 
     memcpy(p_sString, l_sFinal, l_iCursorF);
+    free(l_sFinal);
 }
 
 
@@ -77,15 +83,20 @@ void convertHTML2ASCII(char* p_sString)
  */
 void removeHTMLContent(char* p_sString)
 {
-    char l_sFinal[MAX_CONFIG_LINE_LEN];
+    char* l_sFinal;
     int l_iCursorI;
     int l_iCursorF;
     int l_iCursorC;
     int l_iLen;
     int l_iLevel;
 
-    bzero(l_sFinal, MAX_CONFIG_LINE_LEN);       /* FIXME adjust to the needed size */
     l_iLen = strlen(p_sString);
+    l_sFinal = (char*)malloc(l_iLen * sizeof(char));
+    if(l_sFinal == NULL)
+    {
+        return;
+    }
+    bzero(l_sFinal, l_iLen);
     l_iCursorI = 0;
     l_iCursorF = 0;
     l_iCursorC = 0;
@@ -133,4 +144,5 @@ void removeHTMLContent(char* p_sString)
     }
 
     memcpy(p_sString, l_sFinal, l_iCursorF);
+    free(l_sFinal);
 }

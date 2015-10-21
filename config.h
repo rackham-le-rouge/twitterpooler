@@ -70,6 +70,7 @@ struct MemoryStruct {
 
 struct PagePoolingInitData {
     char sName[MAX_CONFIG_LINE_LEN];
+    char sKeyWords[MAX_CONFIG_LINE_LEN];
 };
 
 typedef struct PagePoolingInitData structPagePoolingInitData;

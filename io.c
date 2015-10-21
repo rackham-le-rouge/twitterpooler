@@ -195,9 +195,10 @@ int initExternalCommunication(void)
  *  name, and so on. If we reach the end of the file, the function send back a ret code. At the
  *  next call, the configuration file is going to be read from the beginning.
  * @param p_sCompagny : string where the compagny is stored. Use this result only if the function returns EXIT_SUCCESS
+ * @param p_sKeyWords : gives attached keywords of the p_sCompagny
  * @return EXIT_FAILURE if there is an opening issue. EOF is we reach the end of the file (no compagny to retrieve on this turn) ; EXIT_SUCCESS is p_sCompagny contains a valid compagny name
  */
-int configurationAnalyseLineByLine(char* p_sCompagny)
+int configurationAnalyseLineByLine(char* p_sCompagny, char* p_sKeyWords)
 {
     char l_cCharacter = 0;
     char l_sLine[MAX_CONFIG_LINE_LEN];
@@ -231,14 +232,19 @@ int configurationAnalyseLineByLine(char* p_sCompagny)
                 /* Remove the 'compagny' marker. It was arbitrary decided */
                 l_sLine[l_iCursor - 1] = '\0';
                 strcpy(p_sCompagny, l_sLine);
-                /* End of this call - but another is coming that's why we don't close the stream  */
-                return EXIT_SUCCESS;
+
+                bzero(l_sLine, strlen(l_sLine));
+                l_iCursor = 0;
             }
             else
             {
+                l_sLine[l_iCursor] = '\0';
+
                 /* We found keywords, clean the line and start another */
-                bzero(l_sLine, strlen(l_sLine));
-                l_iCursor = 0;
+                strcpy(p_sKeyWords, l_sLine);
+
+                /* End of this call - but another is coming that's why we don't close the stream  */
+                return EXIT_SUCCESS;
             }
         }
         else

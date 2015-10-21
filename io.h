@@ -20,7 +20,7 @@ int checkReadWriteFile(const char* p_cFileName);
 int createDirectory(const char* p_cName);
 int checkConfigurationFiles(void);
 int initExternalCommunication(void);
-int configurationAnalyseLineByLine(char* p_sCompagny);
+int configurationAnalyseLineByLine(char* p_sCompagny, char* p_sKeyWords);
 int updateAndReadChecksumFile(char* l_sName, char* p_sMD5Hash, enum checksumFileAction p_enumAction, FILE** p_fileChecksum);
 
 

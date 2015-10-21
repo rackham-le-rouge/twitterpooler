@@ -225,6 +225,7 @@ void networkLoop(int p_iHowManyCompagnies)
     int l_iIterator;
     int* l_iReturnedThreadValue;
     char l_sCompagnyName[MAX_CONFIG_LINE_LEN];
+    char l_sKeyWords[MAX_CONFIG_LINE_LEN];
     pthread_t* l_structPagePoolingThreadID;
 
     l_structPagePoolingInitInformation = (structPagePoolingInitData*)malloc(p_iHowManyCompagnies * sizeof(structPagePoolingInitData));
@@ -251,12 +252,14 @@ void networkLoop(int p_iHowManyCompagnies)
     do
     {
         bzero(l_sCompagnyName, MAX_CONFIG_LINE_LEN);
-        l_iReturnedValue = configurationAnalyseLineByLine(l_sCompagnyName);
+        bzero(l_sKeyWords, MAX_CONFIG_LINE_LEN);
+        l_iReturnedValue = configurationAnalyseLineByLine(l_sCompagnyName, l_sKeyWords);
 
         if(l_iReturnedValue == EXIT_SUCCESS)
         {
             /* We have a valid name */
             strcpy((l_structPagePoolingInitInformation + l_iThreadNumber)->sName, l_sCompagnyName);
+            strcpy((l_structPagePoolingInitInformation + l_iThreadNumber)->sKeyWords, l_sKeyWords);
             LOG_INFO("Start thread for %s", (l_structPagePoolingInitInformation + l_iThreadNumber)->sName);
             if(pthread_create(  l_structPagePoolingThreadID + l_iThreadNumber,
                                 NULL,
