@@ -184,6 +184,7 @@ void* threadPagePooling (void* p_structInitData)
             *****************/
             convertHTML2ASCII(l_sQuote);
             removeHTMLContent(l_sQuote);
+            rtrim(l_sQuote);
             LOG_INFO("Token [%s]", l_sQuote);
  
             /*****************
@@ -192,6 +193,7 @@ void* threadPagePooling (void* p_structInitData)
             *
             *****************/
             /* Remove end of line marker */
+            *(l_sQuote + strlen(l_sQuote)) = ' ';
             memset(l_sCursor, ' ', strlen(TOKEN_DELIMITER_FOR_DATA_END));
         }
     }

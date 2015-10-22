@@ -22,5 +22,6 @@
 
 void convertHTML2ASCII(char* p_sString);
 void removeHTMLContent(char* p_sString);
+void rtrim(char* p_sString);
 
 #endif

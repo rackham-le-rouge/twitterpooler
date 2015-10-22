@@ -146,3 +146,17 @@ void removeHTMLContent(char* p_sString)
     memcpy(p_sString, l_sFinal, l_iCursorF);
     free(l_sFinal);
 }
+
+/**
+ * @brief Function to remove all spaces on the right
+ * @param p_sString : string to trim
+ */
+void rtrim(char* p_sString)
+{
+    char* l_cCursor;
+
+    l_cCursor = p_sString + strlen(p_sString) - 1;
+    while(*l_cCursor-- == ' ');
+
+    *(l_cCursor + 2) = '\0';
+}
