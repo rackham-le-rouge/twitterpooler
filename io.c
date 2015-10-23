@@ -345,3 +345,78 @@ int updateAndReadChecksumFile(char* p_sName, char* p_sMD5Hash, enum checksumFile
 
     return 0;
 }
+
+/**
+ * @brief Function to manage the communication way with the output app. This function have to
+ * handle open / close / update of the 'file' (currently PIPE_NAME). This function add a
+ * mechanism of mutex in order to be protected against multithread hazards. In order to init
+ * static values of this function you have to call INIT mode twice at the begining. The first
+ * one is for the mutex variable initialisation ; the second one is for the pipe opening.
+ * be carefull of the ret code provided by these two calls.
+ * @param p_enumAction : desired action. INIT / CLOSE or UPDATE to write smth in the pipe
+ * @param p_sString : NULL or a pointer to the string to write in the pipe
+ * @param p_mutex : a pointer to the mutex address. If equals NULL means 'do nothing', if this parameter is != NULL the new value overwrite the previous one. This value is stored in the function, you don't have to put it each time at each call
+ */
+int writeInThePipe(enum checksumFileAction p_enumAction, char* p_sString, pthread_mutex_t** p_mutex)
+{
+    static FILE* l_structPipeFile = NULL;
+    static pthread_mutex_t* l_mutex = NULL;
+    int l_iRetCode;
+
+    if(l_mutex == NULL && p_mutex == NULL)
+    {
+        LOG_WARNING("Mutex isn't initialized. Without this security, there could be some synchro issues. try to write [%s]. Abort.", p_sString);
+        return EXIT_FAILURE;
+    }
+    else if(l_mutex == NULL && p_mutex != NULL)
+    {
+        LOG_INFO("Mutex redefinition. %s", " ");
+        l_mutex = *p_mutex;
+        return EXIT_SUCCESS;
+    }
+
+    if(l_structPipeFile == NULL && p_enumAction != INIT)
+    {
+        LOG_WARNING("Try to use the pipe but stream isn't OK to write [%s]. Abort", p_sString);
+        return EXIT_FAILURE;
+    }
+
+    pthread_mutex_lock(l_mutex);
+
+    switch(p_enumAction)
+    {
+        case INIT:
+            LOG_PRINT("Pipe %s have to be opened on the other side.", PIPE_NAME);
+            l_structPipeFile = fopen(PIPE_NAME, "w");   /* FIXME NONBLOCK to add */
+            if(l_structPipeFile == NULL)
+            {
+                LOG_ERROR("File %s impossible to open. No actions on it.", PIPE_NAME);
+            }
+            else
+            {
+                LOG_INFO("Pipe %s correctlly opened.", PIPE_NAME);
+            }
+            break;
+
+        case UPDATE:
+            LOG_INFO("Add [%s]", p_sString);
+            fprintf(l_structPipeFile, "%s\n", p_sString);
+            break;
+
+        case CLOSE:
+            l_iRetCode = fclose(l_structPipeFile);
+            if(l_iRetCode != 0)
+            {
+                LOG_ERROR("fclose failed. Pipe still open for %s, errno is %d", PIPE_NAME, errno);
+            }
+            break;
+
+        case CHECK_EXIST:
+        default:
+            LOG_WARNING("Unautorized action : %d. Do nothing", p_enumAction);
+            break;
+    }
+    pthread_mutex_unlock(l_mutex);
+
+    return EXIT_SUCCESS;
+}

@@ -140,11 +140,13 @@ void printProgressBar(unsigned int p_iMax, unsigned int p_iCurrentValue, char* p
 int main(int argc, char** argv)
 {
     int l_iHowManyCompagnies;
+    pthread_mutex_t* l_mutexPipeAccess;
 
     UNUSED(argc);
     UNUSED(argv);
 
     l_iHowManyCompagnies = 0;
+    l_mutexPipeAccess = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
 
     srand(time(NULL));
 
@@ -172,7 +174,22 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
+    pthread_mutex_init(l_mutexPipeAccess, NULL);
+    if(writeInThePipe(INIT, NULL, &l_mutexPipeAccess) != EXIT_SUCCESS)
+    {
+        LOG_ERROR("Initialisation of the mutex for com  with the pipe failed. errno %d. End is near.", errno);
+        return EXIT_FAILURE;
+    }
+    if(writeInThePipe(INIT, NULL, &l_mutexPipeAccess) != EXIT_SUCCESS)
+    {
+        LOG_ERROR("Initialisation of the stream for the pipe failed. errno %d. End is near.", errno);
+        return EXIT_FAILURE;
+    }
+
     networkLoop(l_iHowManyCompagnies);
+
+    free(l_mutexPipeAccess);
+
     exit(EXIT_SUCCESS);
     return EXIT_SUCCESS;	
 

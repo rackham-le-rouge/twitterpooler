@@ -185,6 +185,7 @@ void* threadPagePooling (void* p_structInitData)
             convertHTML2ASCII(l_sQuote);
             removeHTMLContent(l_sQuote);
             rtrim(l_sQuote);
+            writeInThePipe(UPDATE, l_sQuote, NULL);
             LOG_INFO("Token [%s]", l_sQuote);
  
             /*****************
