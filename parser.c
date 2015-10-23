@@ -160,3 +160,71 @@ void rtrim(char* p_sString)
 
     *(l_cCursor + 2) = '\0';
 }
+
+
+
+/**
+ * @brief This function analyse keywords string gived as an arg, parse it, create the linked
+ * list and fill it with keywords. One keyword per structure. This function returns the
+ * the anchor, in the anchor there is the first keyword and a pointer to the next structure.
+ * The last struture is the one with the 'next' member pointing on NULL.
+ * @param p_sKeywords : pkeyword strings retrieved from the configuration file. Something like "keyword1;keyword2;keyword3;\n"
+ * @return A pointer on the first structure, this structure holds the first keyword. Or NULL if there was no keywords in the p_sParameters strings.
+ */
+linkedListKeywords* getKeywords(char* p_sKeywords)
+{
+    char* l_cCursor;
+    char* l_cBeginingOfTheWord;
+    int l_iWordLenght;
+    linkedListKeywords* l_structAnchor;
+    linkedListKeywords* l_structCurrent;
+    linkedListKeywords* l_structPrevious;
+
+    l_iWordLenght = 0;
+    l_cCursor = p_sKeywords;
+    l_cBeginingOfTheWord = p_sKeywords;
+    l_structAnchor = NULL;
+    l_structCurrent = NULL;
+    l_structPrevious = NULL;
+
+    while(*l_cCursor != '\0')
+    {
+        /* compute the lenght of the word in order to malloc just the right size */
+        while(*l_cCursor != ';')
+        {
+            l_iWordLenght++;
+            l_cCursor++;
+        }
+
+        if(l_structPrevious != NULL)
+        {
+            /* We are on a turn != 0 */
+            l_structPrevious->structNext = (linkedListKeywords*)malloc(sizeof(linkedListKeywords));
+            l_structCurrent = l_structPrevious->structNext;
+        }
+        else
+        {
+            /* We are on the first turn */
+            l_structCurrent = (linkedListKeywords*)malloc(sizeof(linkedListKeywords));
+        }
+        l_structCurrent->structNext = NULL;
+        l_structCurrent->sKeyword = (char*)malloc((l_iWordLenght + 1) * sizeof(char));
+        memcpy(l_structCurrent->sKeyword, l_cBeginingOfTheWord, l_iWordLenght);
+        *(l_structCurrent->sKeyword + l_iWordLenght) = '\0';
+
+        if(l_structAnchor == NULL)
+        {
+            /* We are on the first turn, the anchor */
+            l_structAnchor = l_structCurrent;
+        }
+        l_structPrevious = l_structCurrent;
+
+        /* Handle the end of the string, reset flags, prepare the next detection */
+        l_cBeginingOfTheWord += (l_iWordLenght + 1);
+        l_iWordLenght = 0;
+        l_cCursor++;
+
+        LOG_INFO("Parameter [%s]", l_structCurrent->sKeyword);
+    }
+    return l_structAnchor;
+}

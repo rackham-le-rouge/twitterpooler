@@ -83,6 +83,14 @@ enum checksumFileAction
     CLOSE
 };
 
+typedef struct linkedListKeywords_
+{
+    struct linkedListKeywords_* structNext;
+    char* sKeyword;
+}linkedListKeywords;
+
+
+
 /* Debug part */
 #define UNUSED(x) (void)(x)
 
