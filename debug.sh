@@ -15,3 +15,12 @@ fi
 if [ "$1" == "log" ]; then
     tail -f logcat
 fi
+
+
+if [ "$1" == "cat" ]; then
+    while [[ true ]]
+    do
+        cat extractedTwitter
+        echo -e "\n\n\nNew instance"
+    done
+fi
