@@ -228,3 +228,30 @@ linkedListKeywords* getKeywords(char* p_sKeywords)
     }
     return l_structAnchor;
 }
+
+
+
+/**
+ * @brief This function free() all content of the linked list of the parameters. Provide the
+ * anchor and this function recursivelly clean all content until the end of the list.
+ * @param p_structKeywords : the anchor of the linked list
+ */
+void cleanKeywords(linkedListKeywords* p_structKeywords)
+{
+    unsigned int l_iCounter;
+    linkedListKeywords* l_structCurrent;
+    linkedListKeywords* l_structNext;
+
+    l_iCounter = 0;
+    l_structCurrent = p_structKeywords;
+    while(l_structCurrent != NULL)
+    {
+        l_structNext = l_structCurrent->structNext;
+        free(l_structCurrent->sKeyword);
+        free(l_structCurrent);
+        l_structCurrent = l_structNext;
+        l_iCounter++;
+    }
+    LOG_INFO("Free %d level in the linked list.", l_iCounter);
+}
+

@@ -24,5 +24,6 @@ void convertHTML2ASCII(char* p_sString);
 void removeHTMLContent(char* p_sString);
 void rtrim(char* p_sString);
 linkedListKeywords* getKeywords(char* p_sKeywords);
+void cleanKeywords(linkedListKeywords* p_structKeywords);
 
 #endif
