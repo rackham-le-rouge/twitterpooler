@@ -100,6 +100,7 @@ int retrieveAnUrl(const char* p_cUrlToGet, struct MemoryStruct* p_structMemory)
 void* threadPagePooling (void* p_structInitData)
 {
     structPagePoolingInitData* l_structInitData = (structPagePoolingInitData*)p_structInitData;
+    linkedListKeywords* l_structKeyWords;
     MD5_CTX l_structMD5Context;
     FILE* l_fileChecksum;
     struct MemoryStruct l_structMemory;
@@ -118,9 +119,11 @@ void* threadPagePooling (void* p_structInitData)
     l_sCursor = NULL;
     l_sQuote = NULL;
     l_fileChecksum = NULL;
+    l_structKeyWords = NULL;
 
     MD5_Init(&l_structMD5Context);
     updateAndReadChecksumFile(l_structInitData->sName, NULL, INIT, &l_fileChecksum);
+    l_structKeyWords = getKeywords(l_structInitData->sKeyWords);
 
     if( l_iReturnValue == NULL ||
         l_sUrl == NULL)
@@ -185,7 +188,10 @@ void* threadPagePooling (void* p_structInitData)
             convertHTML2ASCII(l_sQuote);
             removeHTMLContent(l_sQuote);
             rtrim(l_sQuote);
-            writeInThePipe(UPDATE, l_sQuote, NULL);
+            if(keyWordsDetection(l_sQuote, l_structKeyWords) == EXIT_SUCCESS)
+            {
+                writeInThePipe(UPDATE, l_sQuote, NULL);
+            }
             LOG_INFO("Token [%s]", l_sQuote);
  
             /*****************
@@ -208,6 +214,7 @@ void* threadPagePooling (void* p_structInitData)
 
 
     free(l_sUrl);
+    cleanKeywords(l_structKeyWords);
 
     pthread_exit(l_iReturnValue);
 }

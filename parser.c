@@ -255,3 +255,83 @@ void cleanKeywords(linkedListKeywords* p_structKeywords)
     LOG_INFO("Free %d level in the linked list.", l_iCounter);
 }
 
+
+
+
+/**
+ * @brief This function parse the p_sQuote in order to find at least one of the keyword holded in
+ * the linked list p_structKeywords. This function get all keywords in the linked list and try to
+ * find them (even with an approx spelling)
+ * @param p_sQuote : the sentence to analyse
+ * @param p_structKeywords : the linked list with all words to find. Have to be created by getKeywords()
+ * @return EXIT_SUCCESS if at least one ketword is find the sentence p_sQuote even if it was with an approx spelling. On the other case EXIT_FAILURE
+ */
+int keyWordsDetection(char* p_sQuote, linkedListKeywords* p_structKeywords)
+{
+    linkedListKeywords* l_structCurrent;
+    int l_iRetCode = EXIT_FAILURE;
+
+    l_structCurrent = p_structKeywords;
+
+    l_structCurrent = p_structKeywords;
+
+    /* Analyse the whole linked list FIXME basic way to do it. Have to be musch smarter, analyse words in context  and links with other words of the list */
+    while(l_structCurrent != NULL)
+    {
+        if(detectKeyWordInAString(l_structCurrent->sKeyword, p_sQuote) == EXIT_SUCCESS)      /* FIXME too basic way to treat results */
+        {
+            l_iRetCode = EXIT_SUCCESS;
+        }
+        l_structCurrent = l_structCurrent->structNext;
+    }
+
+    return l_iRetCode;
+}
+
+
+
+/**
+ * @brief Function to find a word in the quote. able to find even a word with not exact match.
+ * This function have to be improved a lot in order to find all interesting data
+ * @param p_sKeyWord : the wanted word to find
+ * @param p_sQuote : the string to parse
+ * @return EXIT_SUCCESS or EXIT_FAILURE if the word (even with an approx typo) is or isn't found
+ */
+int detectKeyWordInAString(char* p_sKeyWord, char* p_sQuote)
+{
+    int l_iLenQuote;
+    int l_iLenKeyWord;
+    int l_iCursorQuote;
+    int l_iCursorKeyWord;
+    int l_iCorrelationDegree;
+    int l_iRetCode;
+
+    l_iLenQuote = strlen(p_sQuote);
+    l_iLenKeyWord = strlen(p_sKeyWord);
+    l_iCursorQuote = 0;
+    l_iCursorKeyWord = 0;
+    l_iCorrelationDegree = 0;
+    l_iRetCode = EXIT_FAILURE;
+
+    while(l_iCursorQuote < l_iLenQuote)
+    {
+        while(l_iCursorKeyWord < l_iLenKeyWord && (l_iCursorQuote + l_iCursorKeyWord) < l_iLenQuote)
+        {
+            if(p_sQuote[l_iCursorQuote + l_iCursorKeyWord] == p_sKeyWord[l_iCursorKeyWord])
+            {
+                l_iCorrelationDegree++;
+            }
+            l_iCursorKeyWord++;
+        }
+
+        if(l_iCorrelationDegree > (int)((float)l_iLenKeyWord) * 0.80)       /* FIXME hardcoded */
+        {
+            l_iRetCode = EXIT_SUCCESS;
+        }
+
+        l_iCursorKeyWord = 0;
+        l_iCorrelationDegree = 0;
+        l_iCursorQuote++;
+    }
+    return l_iRetCode;
+}

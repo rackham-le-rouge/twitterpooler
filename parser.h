@@ -25,5 +25,8 @@ void removeHTMLContent(char* p_sString);
 void rtrim(char* p_sString);
 linkedListKeywords* getKeywords(char* p_sKeywords);
 void cleanKeywords(linkedListKeywords* p_structKeywords);
+int detectKeyWordInAString(char* p_sKeyWord, char* p_sQuote);
+int keyWordsDetection(char* p_sQuote, linkedListKeywords* p_structKeywords);
+
 
 #endif
