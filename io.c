@@ -399,7 +399,7 @@ int writeInThePipe(enum checksumFileAction p_enumAction, char* p_sString, pthrea
             break;
 
         case UPDATE:
-            LOG_INFO("Add [%s]", p_sString);
+            LOG_INFO("Add in the pipe [%s]", p_sString);
             fprintf(l_structPipeFile, "%s\n", p_sString);
             break;
 
