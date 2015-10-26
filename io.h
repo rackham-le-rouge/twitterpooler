@@ -23,6 +23,7 @@ int initExternalCommunication(void);
 int configurationAnalyseLineByLine(char* p_sCompagny, char* p_sKeyWords);
 int updateAndReadChecksumFile(char* l_sName, char* p_sMD5Hash, enum checksumFileAction p_enumAction, FILE** p_fileChecksum);
 int writeInThePipe(enum checksumFileAction p_enumAction, char* p_sString, pthread_mutex_t** p_mutex);
+int findLongestLineLenght(FILE* p_structFileToAnalyse);
 
 
 

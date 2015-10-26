@@ -79,6 +79,45 @@ int createDirectory(const char* p_cName)
 }
 
 
+
+
+/**
+ * @brief Compite the max lenght of a line in order to avoid memory wasting
+ * @param p_structFileToAnalyse : file stream to use. This stream is given back with its position reseted at the begining of the file
+ * @return The lenght of longest line
+ */
+int findLongestLineLenght(FILE* p_structFileToAnalyse)
+{
+    int l_iMaxLenght;
+    int l_iCurrentLenght;
+    char l_cCharacter;
+
+    l_iCurrentLenght = 0;
+    l_iMaxLenght = 0;
+
+    /* Go to beginning */
+    fseek (p_structFileToAnalyse, 0, SEEK_SET);
+
+    while(l_cCharacter != EOF)
+    {
+        l_cCharacter = fgetc(p_structFileToAnalyse);
+        l_iCurrentLenght++;
+
+        if(l_cCharacter == '\n')
+        {
+            if(l_iCurrentLenght > l_iMaxLenght)
+            {
+                l_iMaxLenght = l_iCurrentLenght;
+                l_iCurrentLenght = 0;
+            }
+        }
+    }
+
+    /* Leave the file at the begining */
+    fseek (p_structFileToAnalyse, 0, SEEK_SET);
+    return l_iMaxLenght;
+}
+
 /** @brief
  * checkConfigurationFiles is the main function to tests all needed files.
  * that's here we proceed to all calls for checks existance or rights on the needed files.
