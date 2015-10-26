@@ -321,7 +321,7 @@ int configurationAnalyseLineByLine(char* p_sCompagny, char* p_sKeyWords)
  * because the message a new one. With this function, you can open the file, check if a md5
  * is in, append a new md5 at the end and close the file. You have to open the file once, at
  * the thread's starts and close once too at the thread's closing.
- * @param p_sName : name of the page pooled by the thread
+ * @param p_sName : name of the page pooled by the thread.
  * @param p_sMD5Hash : string with the md5sum in it (already converted in letters. You don't have to put a value when p_enumAction equals INIT or CLOSE
  * @param p_enumAction : the wanted action, INIT to init the file descriptor etc.. Cf enum checksumFileAction
  * @param p_fileChecksum : the I/O stream for the .md5 file
@@ -329,9 +329,10 @@ int configurationAnalyseLineByLine(char* p_sCompagny, char* p_sKeyWords)
  */
 int updateAndReadChecksumFile(char* p_sName, char* p_sMD5Hash, enum checksumFileAction p_enumAction, FILE** p_fileChecksum)
 {
-    static char l_sFileName[MAX_CONFIG_LINE_LEN];
     char l_sReadLine[34];       /* 33 + 1 EOL */
     int l_iRetCode;
+    static unsigned int l_iMaxLenOfFilename = 0;
+    static char* l_sFileName = NULL;
 
     l_iRetCode = 0;
     bzero(l_sReadLine, 34);
@@ -343,13 +344,20 @@ int updateAndReadChecksumFile(char* p_sName, char* p_sMD5Hash, enum checksumFile
         return 0;
     }
 
+    if(l_sFileName == NULL)
+    {
+        l_iMaxLenOfFilename = strlen(p_sName) + strlen(CHECKSUM_DIRECTORY) + 2;  /* We have to put the \0 at the end of the line */
+        l_sFileName = (char*)malloc(l_iMaxLenOfFilename * sizeof(char));
+        if(l_sFileName == NULL) return -ENOMEM;
+    }
+
 
     /* Classical actions, described in the enum structure */
     switch(p_enumAction)
     {
         /* To call once at the first usage of this function */
         case INIT:
-            snprintf(l_sFileName, MAX_CONFIG_LINE_LEN, "%s/%s.md5", CHECKSUM_DIRECTORY, p_sName);
+            snprintf(l_sFileName, l_iMaxLenOfFilename, "%s/%s.md5", CHECKSUM_DIRECTORY, p_sName);
             *p_fileChecksum = fopen(l_sFileName, "a+");
             if(*p_fileChecksum == NULL)
             {
@@ -375,7 +383,7 @@ int updateAndReadChecksumFile(char* p_sName, char* p_sMD5Hash, enum checksumFile
             fseek (*p_fileChecksum, 0, SEEK_SET);
             do
             {
-                fgets(l_sReadLine, MAX_CONFIG_LINE_LEN, *p_fileChecksum);
+                fgets(l_sReadLine, l_iMaxLenOfFilename, *p_fileChecksum);
                 if(strstr(l_sReadLine, p_sMD5Hash) != NULL)
                 {
                     return 1;
