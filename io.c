@@ -121,16 +121,17 @@ int findLongestLineLenght(FILE* p_structFileToAnalyse)
 /** @brief
  * checkConfigurationFiles is the main function to tests all needed files.
  * that's here we proceed to all calls for checks existance or rights on the needed files.
- * @return If we have all config files and no issues with IO permission returns how many compagnies hold in the configuration file. -EXIT_FAILURE or a negative value if there is any error
+ * @return If we have all config files and no issues with IO permission returns how many compagnies hold in the configuration file. -EXIT_FAILURE or a negative value if there is any error. -ENOMEM if there was not enought memory to allocate variables
  */
 int checkConfigurationFiles(void)
 {
     FILE* l_fileConfigurationFile = NULL;
     FILE* l_fileEmptyChecksumFile = NULL;
     char l_cCharacter = 0;
-    char l_sLine[MAX_CONFIG_LINE_LEN];
-    char l_sFileWithCompagnyChecksums[MAX_CONFIG_LINE_LEN];
+    char* l_sLine;
+    char* l_sFileWithCompagnyChecksums;
     unsigned int l_iCursor = 0;
+    unsigned int l_iMaxLenOfALine = 0;
     int l_iCompagnyCounter = 0;
 
     /* Doesn't care about the ret code, because EEXIST seems to be K.O, this 
@@ -149,12 +150,18 @@ int checkConfigurationFiles(void)
         return -EXIT_FAILURE;
     }
 
+    l_iMaxLenOfALine = findLongestLineLenght(l_fileConfigurationFile) + 1;  /* We have to put the \0 at the end of the line */
+    l_sLine = (char*)malloc(l_iMaxLenOfALine * sizeof(char));
+    l_sFileWithCompagnyChecksums = (char*)malloc((l_iMaxLenOfALine + strlen(CHECKSUM_DIRECTORY) + 1) * sizeof(char));
+    if(l_sLine == NULL) return -ENOMEM;
+    if(l_sFileWithCompagnyChecksums == NULL) return -ENOMEM;
+
     while(l_cCharacter != EOF)
     {
         l_cCharacter = fgetc(l_fileConfigurationFile);
 
         /* End of line - Check is we take a compagny name or a keyword */
-        if(l_cCharacter == '\n' || l_iCursor > MAX_CONFIG_LINE_LEN - 1)
+        if(l_cCharacter == '\n' || l_iCursor > l_iMaxLenOfALine - 1)
         {
             if(l_sLine[l_iCursor - 1] == ':')
             {
@@ -165,9 +172,9 @@ int checkConfigurationFiles(void)
                 LOG_INFO("Checking compagny %s", l_sLine);
                 l_iCompagnyCounter++;
 
-                bzero(l_sFileWithCompagnyChecksums, MAX_CONFIG_LINE_LEN);
+                bzero(l_sFileWithCompagnyChecksums, l_iMaxLenOfALine);
                 snprintf(l_sFileWithCompagnyChecksums,
-                        MAX_CONFIG_LINE_LEN,
+                        l_iMaxLenOfALine,
                         "%s/%s.md5",
                         CHECKSUM_DIRECTORY,
                         l_sLine);
@@ -204,6 +211,7 @@ int checkConfigurationFiles(void)
     }
 
     fclose(l_fileConfigurationFile);
+    free(l_sLine);
 
     return l_iCompagnyCounter;
 }
