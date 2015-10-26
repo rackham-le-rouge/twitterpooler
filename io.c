@@ -248,8 +248,9 @@ int initExternalCommunication(void)
 int configurationAnalyseLineByLine(char* p_sCompagny, char* p_sKeyWords)
 {
     char l_cCharacter = 0;
-    char l_sLine[MAX_CONFIG_LINE_LEN];
     unsigned int l_iCursor = 0;
+    static char* l_sLine;
+    static unsigned int l_iMaxLenOfALine = 0;
     static FILE* l_fileConfigurationFile = NULL;
 
 
@@ -263,14 +264,20 @@ int configurationAnalyseLineByLine(char* p_sCompagny, char* p_sKeyWords)
         {
             return EXIT_FAILURE;
         }
+
+        l_iMaxLenOfALine = findLongestLineLenght(l_fileConfigurationFile) + 1;  /* We have to put the \0 at the end of the line */
+        l_sLine = (char*)malloc(l_iMaxLenOfALine * sizeof(char));
+        if(l_sLine == NULL) return -ENOMEM;
     }
+
+    bzero(l_sLine, l_iMaxLenOfALine);
 
     while(l_cCharacter != EOF)
     {
         l_cCharacter = fgetc(l_fileConfigurationFile);
 
         /* End of line - Check is we take a compagny name or a keyword */
-        if(l_cCharacter == '\n' || l_iCursor > MAX_CONFIG_LINE_LEN - 1)
+        if(l_cCharacter == '\n' || l_iCursor > l_iMaxLenOfALine - 1)
         {
             if(l_sLine[l_iCursor - 1] == ':')
             {
