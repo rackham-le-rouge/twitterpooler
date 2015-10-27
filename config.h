@@ -47,7 +47,6 @@
 #define MAX_URL_BEFORE_SAVING_INIT      9
 #define MAX_URL_NUMBER_OF_TURN_TO_FIX   10
 #define MAX_URL_MAXIMUM_PER_TURN        50
-#define MAX_CONFIG_LINE_LEN             1024
 #define PROGRESS_BAR_BODY_CHARACTER     '-'
 #define PROGRESS_BAR_HEAD_CHARACTER     '>' 
 #define SCREEN_SIZE_COLUMN_MIN          20
@@ -69,8 +68,8 @@ struct MemoryStruct {
 };
 
 struct PagePoolingInitData {
-    char sName[MAX_CONFIG_LINE_LEN];
-    char sKeyWords[MAX_CONFIG_LINE_LEN];    /* FIXME fuck this limitation */
+    char* sName;
+    char* sKeyWords;
 };
 
 typedef struct PagePoolingInitData structPagePoolingInitData;

@@ -109,13 +109,15 @@ void* threadPagePooling (void* p_structInitData)
     char* l_sQuote;
     int* l_iReturnValue;
     int l_iIterator;
+    unsigned int l_iMaxSizeOfTheUrl;
     char l_sMD5Hash[33];
     unsigned char l_iMD5Output[16];     /* Declared as an array of bytes */
 
     LOG_INFO("Thread for %s started.", l_structInitData->sName);
 
+    l_iMaxSizeOfTheUrl = findLongestLineLenght(NULL) + strlen(URL_PREFIX) + 2;  /* 1 for the / and 1 for the \0 means 2 */
     l_iReturnValue = (int*)malloc(sizeof(int));
-    l_sUrl = (char*)malloc(MAX_CONFIG_LINE_LEN * sizeof(char));
+    l_sUrl = (char*)malloc(l_iMaxSizeOfTheUrl * sizeof(char));
     l_sCursor = NULL;
     l_sQuote = NULL;
     l_fileChecksum = NULL;
@@ -133,7 +135,7 @@ void* threadPagePooling (void* p_structInitData)
     }
 
     /* URL creation for this thread - This thread is only going to pool this URL */
-    snprintf(l_sUrl, MAX_CONFIG_LINE_LEN, "%s/%s", URL_PREFIX, l_structInitData->sName);
+    snprintf(l_sUrl, l_iMaxSizeOfTheUrl, "%s/%s", URL_PREFIX, l_structInitData->sName);
     if(retrieveAnUrl(l_sUrl, &l_structMemory) == EXIT_SUCCESS)
     {
         LOG_INFO("Page %s retrieved. Bytes %d", l_sUrl, l_structMemory.size);
@@ -234,9 +236,15 @@ void networkLoop(int p_iHowManyCompagnies)
     int l_iThreadNumber;
     int l_iIterator;
     int* l_iReturnedThreadValue;
-    char l_sCompagnyName[MAX_CONFIG_LINE_LEN];
-    char l_sKeyWords[MAX_CONFIG_LINE_LEN];
+    int l_iMaxLenOfALine;
+    char* l_sCompagnyName;
+    char* l_sKeyWords;
     pthread_t* l_structPagePoolingThreadID;
+
+    l_iMaxLenOfALine = findLongestLineLenght(NULL) + 1;
+    l_sCompagnyName = (char*)malloc(l_iMaxLenOfALine * sizeof(char));
+    l_sKeyWords = (char*)malloc(l_iMaxLenOfALine * sizeof(char));
+    if(l_sCompagnyName == NULL || l_sKeyWords == NULL) exit(ENOMEM);
 
     l_structPagePoolingInitInformation = (structPagePoolingInitData*)malloc(p_iHowManyCompagnies * sizeof(structPagePoolingInitData));
     l_structPagePoolingThreadID = (pthread_t*)malloc(p_iHowManyCompagnies * sizeof(pthread_t));
@@ -261,15 +269,20 @@ void networkLoop(int p_iHowManyCompagnies)
     /* Analyse the configuration file, find page's name, and start one thread per page */
     do
     {
-        bzero(l_sCompagnyName, MAX_CONFIG_LINE_LEN);
-        bzero(l_sKeyWords, MAX_CONFIG_LINE_LEN);
+        bzero(l_sCompagnyName, l_iMaxLenOfALine);
+        bzero(l_sKeyWords, l_iMaxLenOfALine);
         l_iReturnedValue = configurationAnalyseLineByLine(l_sCompagnyName, l_sKeyWords);
 
         if(l_iReturnedValue == EXIT_SUCCESS)
         {
             /* We have a valid name */
+            (l_structPagePoolingInitInformation + l_iThreadNumber)->sName = (char*)malloc((strlen(l_sCompagnyName) + 1) * sizeof(char));
+            (l_structPagePoolingInitInformation + l_iThreadNumber)->sKeyWords = (char*)malloc((strlen(l_sKeyWords) + 1)  * sizeof(char));
+            if((l_structPagePoolingInitInformation + l_iThreadNumber)->sName == NULL || (l_structPagePoolingInitInformation + l_iThreadNumber)->sKeyWords == NULL) exit(ENOMEM);
+
             strcpy((l_structPagePoolingInitInformation + l_iThreadNumber)->sName, l_sCompagnyName);
             strcpy((l_structPagePoolingInitInformation + l_iThreadNumber)->sKeyWords, l_sKeyWords);
+
             LOG_INFO("Start thread for %s", (l_structPagePoolingInitInformation + l_iThreadNumber)->sName);
             if(pthread_create(  l_structPagePoolingThreadID + l_iThreadNumber,
                                 NULL,
@@ -310,11 +323,17 @@ void networkLoop(int p_iHowManyCompagnies)
                 LOG_INFO("Returned value for %d is %d", l_iIterator, *l_iReturnedThreadValue);
                 *(l_structPagePoolingThreadID + l_iIterator) = 0;
 
-                /* release memory declared in the thread */
+                /* release memory declared in/for the thread */
                 free(l_iReturnedThreadValue);
+                free((l_structPagePoolingInitInformation + l_iIterator)->sName);
+                free((l_structPagePoolingInitInformation + l_iIterator)->sKeyWords);
             }
         }
     }
+
+    free(l_structPagePoolingInitInformation);
+    free(l_sCompagnyName);
+    free(l_sKeyWords);
 }
 
 
