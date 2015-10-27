@@ -83,14 +83,19 @@ int createDirectory(const char* p_cName)
 
 /**
  * @brief Compite the max lenght of a line in order to avoid memory wasting
- * @param p_structFileToAnalyse : file stream to use. This stream is given back with its position reseted at the begining of the file
+ * @param p_structFileToAnalyse : file stream to use. This stream is given back with its position reseted at the begining of the file. If equals NULL return the previous max value. Used for functions with no stream opened
  * @return The lenght of longest line
  */
 int findLongestLineLenght(FILE* p_structFileToAnalyse)
 {
-    int l_iMaxLenght;
     int l_iCurrentLenght;
     char l_cCharacter;
+    static int l_iMaxLenght = 0;
+
+    if(p_structFileToAnalyse == NULL)
+    {
+        return l_iMaxLenght;
+    }
 
     l_iCurrentLenght = 0;
     l_iMaxLenght = 0;
@@ -308,6 +313,7 @@ int configurationAnalyseLineByLine(char* p_sCompagny, char* p_sKeyWords)
     }
 
     fclose(l_fileConfigurationFile);
+    /* free(l_sLine); // Can't do it now, have to find a system FIXME */
 
     return EOF;
 }
@@ -346,7 +352,7 @@ int updateAndReadChecksumFile(char* p_sName, char* p_sMD5Hash, enum checksumFile
 
     if(l_sFileName == NULL)
     {
-        l_iMaxLenOfFilename = strlen(p_sName) + strlen(CHECKSUM_DIRECTORY) + 2;  /* We have to put the \0 at the end of the line */
+        l_iMaxLenOfFilename = findLongestLineLenght(NULL) + strlen(CHECKSUM_DIRECTORY) + 5;  /* We have to put the \0 at the end of the line and the .md5 extention */
         l_sFileName = (char*)malloc(l_iMaxLenOfFilename * sizeof(char));
         if(l_sFileName == NULL) return -ENOMEM;
     }
@@ -383,7 +389,7 @@ int updateAndReadChecksumFile(char* p_sName, char* p_sMD5Hash, enum checksumFile
             fseek (*p_fileChecksum, 0, SEEK_SET);
             do
             {
-                fgets(l_sReadLine, l_iMaxLenOfFilename, *p_fileChecksum);
+                fgets(l_sReadLine, 34, *p_fileChecksum);
                 if(strstr(l_sReadLine, p_sMD5Hash) != NULL)
                 {
                     return 1;
@@ -404,6 +410,8 @@ int updateAndReadChecksumFile(char* p_sName, char* p_sMD5Hash, enum checksumFile
             LOG_WARNING("This action doen't exist : %d", p_enumAction);
             break;
     }
+
+    /* free(l_iMaxLenOfFilename); // Can't do it now, have to find a system FIXME */
 
     return 0;
 }
