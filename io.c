@@ -429,8 +429,8 @@ int updateAndReadChecksumFile(char* p_sName, char* p_sMD5Hash, enum checksumFile
  */
 int writeInThePipe(enum checksumFileAction p_enumAction, char* p_sString, pthread_mutex_t** p_mutex)
 {
-    static FILE* l_structPipeFile = NULL;
     static pthread_mutex_t* l_mutex = NULL;
+    static int l_structFileDescriptorPipe = -1;
     int l_iRetCode;
 
     if(l_mutex == NULL && p_mutex == NULL)
@@ -445,7 +445,7 @@ int writeInThePipe(enum checksumFileAction p_enumAction, char* p_sString, pthrea
         return EXIT_SUCCESS;
     }
 
-    if(l_structPipeFile == NULL && p_enumAction != INIT)
+    if(l_structFileDescriptorPipe < 0 && p_enumAction != INIT)
     {
         LOG_WARNING("Try to use the pipe but stream isn't OK to write [%s]. Abort", p_sString);
         return EXIT_FAILURE;
@@ -456,9 +456,8 @@ int writeInThePipe(enum checksumFileAction p_enumAction, char* p_sString, pthrea
     switch(p_enumAction)
     {
         case INIT:
-            LOG_PRINT("Pipe %s have to be opened on the other side.", PIPE_NAME);
-            l_structPipeFile = fopen(PIPE_NAME, "w");   /* FIXME NONBLOCK to add */
-            if(l_structPipeFile == NULL)
+            l_structFileDescriptorPipe = open(PIPE_NAME, O_NONBLOCK | O_WRONLY);
+            if(l_structFileDescriptorPipe < 0)
             {
                 LOG_ERROR("File %s impossible to open. No actions on it.", PIPE_NAME);
             }
@@ -470,11 +469,11 @@ int writeInThePipe(enum checksumFileAction p_enumAction, char* p_sString, pthrea
 
         case UPDATE:
             LOG_INFO("Add in the pipe [%s]", p_sString);
-            fprintf(l_structPipeFile, "%s\n", p_sString);
+            write(l_structFileDescriptorPipe, p_sString, strlen(p_sString));
             break;
 
         case CLOSE:
-            l_iRetCode = fclose(l_structPipeFile);
+            l_iRetCode = close(l_structFileDescriptorPipe);
             if(l_iRetCode != 0)
             {
                 LOG_ERROR("fclose failed. Pipe still open for %s, errno is %d", PIPE_NAME, errno);

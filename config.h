@@ -31,6 +31,7 @@
 #include <sys/stat.h>
 #include <pthread.h>
 #include <openssl/md5.h>
+#include <fcntl.h>
 
 /* Some constants */
 #define DEBUG_LEVEL	                    5
