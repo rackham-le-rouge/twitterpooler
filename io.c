@@ -313,7 +313,8 @@ int configurationAnalyseLineByLine(char* p_sCompagny, char* p_sKeyWords)
     }
 
     fclose(l_fileConfigurationFile);
-    /* free(l_sLine); // Can't do it now, have to find a system FIXME */
+    free(l_sLine);
+    l_sLine = NULL;
 
     return EOF;
 }
@@ -338,7 +339,7 @@ int updateAndReadChecksumFile(char* p_sName, char* p_sMD5Hash, enum checksumFile
     char l_sReadLine[34];       /* 33 + 1 EOL */
     int l_iRetCode;
     static unsigned int l_iMaxLenOfFilename = 0;
-    static char* l_sFileName = NULL;
+    char* l_sFileName = NULL;
 
     l_iRetCode = 0;
     bzero(l_sReadLine, 34);
@@ -350,9 +351,9 @@ int updateAndReadChecksumFile(char* p_sName, char* p_sMD5Hash, enum checksumFile
         return 0;
     }
 
-    if(l_sFileName == NULL)
+    if(p_enumAction == INIT)
     {
-        l_iMaxLenOfFilename = findLongestLineLenght(NULL) + strlen(CHECKSUM_DIRECTORY) + 5;  /* We have to put the \0 at the end of the line and the .md5 extention */
+        l_iMaxLenOfFilename = strlen(CHECKSUM_DIRECTORY) + strlen(p_sName) + 6;  /* We have to put the \0 at the end of the line and the .md5 extention */
         l_sFileName = (char*)malloc(l_iMaxLenOfFilename * sizeof(char));
         if(l_sFileName == NULL) return -ENOMEM;
     }
@@ -402,7 +403,7 @@ int updateAndReadChecksumFile(char* p_sName, char* p_sMD5Hash, enum checksumFile
             l_iRetCode = fclose(*p_fileChecksum);
             if(l_iRetCode != 0)
             {
-                LOG_ERROR("fclose failed. File still open for %s, errno is %d", l_sFileName, errno);
+                LOG_ERROR("fclose failed. File still open for %s.md5, errno is %d", p_sName, errno);
             }
             break;
 
@@ -411,7 +412,10 @@ int updateAndReadChecksumFile(char* p_sName, char* p_sMD5Hash, enum checksumFile
             break;
     }
 
-    /* free(l_iMaxLenOfFilename); // Can't do it now, have to find a system FIXME */
+    if(p_enumAction == INIT)
+    {
+        free(l_sFileName);
+    }
 
     return 0;
 }
