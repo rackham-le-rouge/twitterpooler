@@ -161,6 +161,15 @@ void* threadPagePooling (void* p_structInitData)
 
             /*****************
             *
+            *  Clean the HTML
+            *
+            *****************/
+            convertHTML2ASCII(l_sQuote);
+            removeHTMLContent(l_sQuote);
+            rtrim(l_sQuote);
+
+            /*****************
+            *
             * MD5 of the quote
             *
             *****************/
@@ -180,21 +189,13 @@ void* threadPagePooling (void* p_structInitData)
             if(updateAndReadChecksumFile(l_structInitData->sName, l_sMD5Hash, CHECK_EXIST, &l_fileChecksum) != 1)
             {
                 updateAndReadChecksumFile(l_structInitData->sName, l_sMD5Hash, UPDATE, &l_fileChecksum);
-            }
 
-            /*****************
-            *
-            *  Clean the HTML
-            *
-            *****************/
-            convertHTML2ASCII(l_sQuote);
-            removeHTMLContent(l_sQuote);
-            rtrim(l_sQuote);
-            if(keyWordsDetection(l_sQuote, l_structKeyWords) == EXIT_SUCCESS)
-            {
-                writeInThePipe(UPDATE, l_sQuote, NULL);
+                if(keyWordsDetection(l_sQuote, l_structKeyWords) == EXIT_SUCCESS)
+                {
+                    writeInThePipe(UPDATE, l_sQuote, NULL);
+                }
+                LOG_INFO("Token [%s]", l_sQuote);
             }
-            LOG_INFO("Token [%s]", l_sQuote);
  
             /*****************
             *
