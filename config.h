@@ -52,6 +52,7 @@
 #define PROGRESS_BAR_HEAD_CHARACTER     '>' 
 #define SCREEN_SIZE_COLUMN_MIN          20
 #define PIPE_NAME                       "extractedTwitter"
+#define WORD_CORRELATION                0.80        /* Means that we can have 20% of difference between the read word and the keyword */
 
 /* Logic stuff */
 enum boolean

@@ -335,7 +335,7 @@ int detectKeyWordInAString(char* p_sKeyWord, char* p_sQuote)
             l_iCursorKeyWord++;
         }
 
-        if(l_iCorrelationDegree > (int)((float)l_iLenKeyWord) * 0.80)       /* FIXME hardcoded */
+        if(l_iCorrelationDegree > (int)((float)l_iLenKeyWord) * WORD_CORRELATION)
         {
             l_iRetCode = EXIT_SUCCESS;
         }
