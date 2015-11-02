@@ -87,6 +87,8 @@ typedef struct linkedListKeywords_
 {
     struct linkedListKeywords_* structNext;
     char* sKeyword;
+    char cSpecialWordLevel;
+    int iWordLevel;
 }linkedListKeywords;
 
 

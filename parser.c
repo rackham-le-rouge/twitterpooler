@@ -176,10 +176,14 @@ linkedListKeywords* getKeywords(char* p_sKeywords)
     char* l_cCursor;
     char* l_cBeginingOfTheWord;
     int l_iWordLenght;
+    int l_iWordLevel;   /* Define the word position in the wanted sentence according to our algo */
+    char l_cSpecialWordLevel;   /* For word level < 0 we refer to this value to define a special behavior */
     linkedListKeywords* l_structAnchor;
     linkedListKeywords* l_structCurrent;
     linkedListKeywords* l_structPrevious;
 
+    l_iWordLevel = 0;
+    l_cSpecialWordLevel = 'A';
     l_iWordLenght = 0;
     l_cCursor = p_sKeywords;
     l_cBeginingOfTheWord = p_sKeywords;
@@ -207,10 +211,17 @@ linkedListKeywords* getKeywords(char* p_sKeywords)
             /* We are on the first turn */
             l_structCurrent = (linkedListKeywords*)malloc(sizeof(linkedListKeywords));
         }
+
+        /* Fill this section of the linked list */
         l_structCurrent->structNext = NULL;
         l_structCurrent->sKeyword = (char*)malloc((l_iWordLenght + 1) * sizeof(char));
+        /* this function have to re-cut the keyword and find word level and special attribute of this keyword */
+        l_cBeginingOfTheWord = extractWordLevel(&l_cSpecialWordLevel, &l_iWordLevel, l_cBeginingOfTheWord, &l_iWordLenght);
+
         memcpy(l_structCurrent->sKeyword, l_cBeginingOfTheWord, l_iWordLenght);
         *(l_structCurrent->sKeyword + l_iWordLenght) = '\0';
+        l_structCurrent->cSpecialWordLevel = l_cSpecialWordLevel;
+        l_structCurrent->iWordLevel = l_iWordLevel;
 
         if(l_structAnchor == NULL)
         {
@@ -224,7 +235,7 @@ linkedListKeywords* getKeywords(char* p_sKeywords)
         l_iWordLenght = 0;
         l_cCursor++;
 
-        LOG_INFO("Parameter [%s]", l_structCurrent->sKeyword);
+        LOG_INFO("Parameter [%s] WordLevel %d:%c", l_structCurrent->sKeyword, l_structCurrent->iWordLevel, l_structCurrent->cSpecialWordLevel);
     }
     return l_structAnchor;
 }
@@ -334,4 +345,44 @@ int detectKeyWordInAString(char* p_sKeyWord, char* p_sQuote)
         l_iCursorQuote++;
     }
     return l_iRetCode;
+}
+
+
+/** @brief Function to extract the WordLevel -the importance & position- of a keyword in the wanted sentence
+ * @param p_cSpecialWordLevel : if it is a special keyword, its wordlevel is a letter - please refer to the doc of the semantic algo
+ * @param p_iWordLevel : conventionnal numeric word level, define order of appearance
+ * @param p_sKeyWord : the keyword to analyse. Could be "X:keyword" or "Y:keyword" or "234:keyword" or even "keyword" (without any order specified) etc...
+ * @return a pointer on the real begining of the keyword
+ */
+char* extractWordLevel(char* p_cSpecialWordLevel, int* p_iWordLevel, char* p_sKeyWord, int* p_iWordLenght)
+{
+    int l_iCursor;
+    char* l_cBeginingOfTheWord;
+
+    l_cBeginingOfTheWord = p_sKeyWord;
+    l_iCursor = 0;
+
+    while(l_iCursor < *p_iWordLenght)
+    {
+        if(*(p_sKeyWord + l_iCursor) == ':')
+        {
+            l_cBeginingOfTheWord += (l_iCursor + 1);
+
+            if(*(p_sKeyWord + l_iCursor - 1) >= 'A' && *(p_sKeyWord + l_iCursor - 1) <= 'Z')
+            {
+                *p_iWordLevel = -1;
+                *p_cSpecialWordLevel = *(p_sKeyWord + l_iCursor - 1);
+            }
+            else
+            {
+                *p_iWordLevel = atoi(p_sKeyWord);
+                *p_cSpecialWordLevel = 'A';
+            }
+        }
+
+        l_iCursor++;
+    }
+
+    *p_iWordLenght = *p_iWordLenght - (l_cBeginingOfTheWord - p_sKeyWord);
+    return l_cBeginingOfTheWord;
 }
