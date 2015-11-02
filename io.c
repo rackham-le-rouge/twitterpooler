@@ -338,7 +338,7 @@ int updateAndReadChecksumFile(char* p_sName, char* p_sMD5Hash, enum checksumFile
 {
     char l_sReadLine[34];       /* 33 + 1 EOL */
     int l_iRetCode;
-    static unsigned int l_iMaxLenOfFilename = 0;
+    unsigned int l_iMaxLenOfFilename = 0;
     char* l_sFileName = NULL;
 
     l_iRetCode = 0;
