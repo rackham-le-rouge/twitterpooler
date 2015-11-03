@@ -32,6 +32,7 @@
 #include <pthread.h>
 #include <openssl/md5.h>
 #include <fcntl.h>
+#include <ctype.h>
 
 /* Some constants */
 #define DEBUG_LEVEL	                    5

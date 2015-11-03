@@ -199,6 +199,21 @@ void removeUselessSpaces(char* p_sString)
 }
 
 
+/**
+ * @brief To transform the case of the provided sentence. Avoid case issue in the word finding algo
+ * @param p_sString : string to convert to lower case
+ * @return p_sString : the string is directly modified at its own memory address
+ */
+void toLowerCase(char* p_sString)
+{
+    while(*p_sString != '\0')
+    {
+        *p_sString = tolower(*p_sString);
+        p_sString++;
+    }
+}
+
+
 
 /**
  * @brief This function analyse keywords string gived as an arg, parse it, create the linked
@@ -257,6 +272,7 @@ linkedListKeywords* getKeywords(char* p_sKeywords)
 
         memcpy(l_structCurrent->sKeyword, l_cBeginingOfTheWord, l_iWordLenght);
         *(l_structCurrent->sKeyword + l_iWordLenght) = '\0';
+        toLowerCase(l_structCurrent->sKeyword);             /* erase the case */
         l_structCurrent->cSpecialWordLevel = l_cSpecialWordLevel;
         l_structCurrent->iWordLevel = l_iWordLevel;
 
