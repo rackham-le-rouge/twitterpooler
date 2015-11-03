@@ -181,6 +181,7 @@ void* threadPagePooling (void* p_structInitData)
                 * MD5 of the quote
                 *
                 *****************/
+                MD5_Init(&l_structMD5Context);
                 MD5_Update(&l_structMD5Context, l_sQuote, strlen(l_sQuote));
                 MD5_Final(l_iMD5Output, &l_structMD5Context);
 
