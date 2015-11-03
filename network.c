@@ -126,7 +126,6 @@ void* threadPagePooling (void* p_structInitData)
     l_structInitData->structThreadStateInfo->iQuoteTreated = 0;
     *l_iReturnValue = 0;
 
-    MD5_Init(&l_structMD5Context);
     updateAndReadChecksumFile(l_structInitData->sName, NULL, INIT, &l_fileChecksum);
     l_structKeyWords = getKeywords(l_structInitData->sKeyWords);
 
