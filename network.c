@@ -122,6 +122,9 @@ void* threadPagePooling (void* p_structInitData)
     l_sQuote = NULL;
     l_fileChecksum = NULL;
     l_structKeyWords = NULL;
+    l_structInitData->structThreadStateInfo->bHaveToDie = FALSE;
+    l_structInitData->structThreadStateInfo->iQuoteTreated = 0;
+    *l_iReturnValue = 0;
 
     MD5_Init(&l_structMD5Context);
     updateAndReadChecksumFile(l_structInitData->sName, NULL, INIT, &l_fileChecksum);
@@ -136,86 +139,91 @@ void* threadPagePooling (void* p_structInitData)
 
     /* URL creation for this thread - This thread is only going to pool this URL */
     snprintf(l_sUrl, l_iMaxSizeOfTheUrl, "%s/%s", URL_PREFIX, l_structInitData->sName);
-    if(retrieveAnUrl(l_sUrl, &l_structMemory) == EXIT_SUCCESS)
-    {
-        LOG_INFO("Page %s retrieved. Bytes %d", l_sUrl, l_structMemory.size);
 
-        while(strstr(l_structMemory.memory, TOKEN_DELIMITER_FOR_DATA_START) != NULL)
+    while(l_structInitData->structThreadStateInfo->bHaveToDie != TRUE)
+    {
+        if(retrieveAnUrl(l_sUrl, &l_structMemory) == EXIT_SUCCESS)
         {
-            /*****************
-            *
-            * Quote retrieving
-            *
-            *****************/
-            /* Find token and remove starting point */
-            l_sQuote = strstr(l_structMemory.memory, TOKEN_DELIMITER_FOR_DATA_START);
-            memset(l_sQuote, ' ', strlen(TOKEN_DELIMITER_FOR_DATA_START));
+            LOG_INFO("Page %s retrieved. Bytes %d", l_sUrl, l_structMemory.size);
 
-            /* Prepare the line, starting and end of it */
-            l_sQuote = strstr(l_sQuote, ">") + 1;
-            l_sCursor = strstr(l_sQuote, TOKEN_DELIMITER_FOR_DATA_END);
-            memset(l_sCursor, '\0', strlen(TOKEN_DELIMITER_FOR_DATA_END));
-
-            /* Here, line is in l_sQuote, until the \0 character. And end of the line is at l_sCursor */
-            /*LOG_INFO("Token [%s]", l_sQuote);*/
-
-            /*****************
-            *
-            *  Clean the HTML
-            *
-            *****************/
-            convertHTML2ASCII(l_sQuote);
-            removeHTMLContent(l_sQuote);
-            removeUselessSpaces(l_sQuote);
-            toLowerCase(l_sQuote);
-            rtrim(l_sQuote);
-
-            /*****************
-            *
-            * MD5 of the quote
-            *
-            *****************/
-            MD5_Update(&l_structMD5Context, l_sQuote, strlen(l_sQuote));
-            MD5_Final(l_iMD5Output, &l_structMD5Context);
-
-            for(l_iIterator = 0; l_iIterator < 16; ++l_iIterator)
+            while(strstr(l_structMemory.memory, TOKEN_DELIMITER_FOR_DATA_START) != NULL)
             {
-                sprintf(&l_sMD5Hash[l_iIterator * 2], "%02x", (unsigned int)l_iMD5Output[l_iIterator]);
-            }
+                /*****************
+                *
+                * Quote retrieving
+                *
+                *****************/
+                /* Find token and remove starting point */
+                l_sQuote = strstr(l_structMemory.memory, TOKEN_DELIMITER_FOR_DATA_START);
+                memset(l_sQuote, ' ', strlen(TOKEN_DELIMITER_FOR_DATA_START));
 
-            /*****************
-            *
-            *  MD5Quote save
-            *
-            *****************/
-            if(updateAndReadChecksumFile(l_structInitData->sName, l_sMD5Hash, CHECK_EXIST, &l_fileChecksum) != 1)
-            {
-                updateAndReadChecksumFile(l_structInitData->sName, l_sMD5Hash, UPDATE, &l_fileChecksum);
+                /* Prepare the line, starting and end of it */
+                l_sQuote = strstr(l_sQuote, ">") + 1;
+                l_sCursor = strstr(l_sQuote, TOKEN_DELIMITER_FOR_DATA_END);
+                memset(l_sCursor, '\0', strlen(TOKEN_DELIMITER_FOR_DATA_END));
 
-                if(keyWordsDetection(l_sQuote, l_structKeyWords) == EXIT_SUCCESS)
+                /* Here, line is in l_sQuote, until the \0 character. And end of the line is at l_sCursor */
+                /*LOG_INFO("Token [%s]", l_sQuote);*/
+
+                /*****************
+                *
+                *  Clean the HTML
+                *
+                *****************/
+                convertHTML2ASCII(l_sQuote);
+                removeHTMLContent(l_sQuote);
+                removeUselessSpaces(l_sQuote);
+                toLowerCase(l_sQuote);
+                rtrim(l_sQuote);
+
+                /*****************
+                *
+                * MD5 of the quote
+                *
+                *****************/
+                MD5_Update(&l_structMD5Context, l_sQuote, strlen(l_sQuote));
+                MD5_Final(l_iMD5Output, &l_structMD5Context);
+
+                for(l_iIterator = 0; l_iIterator < 16; ++l_iIterator)
                 {
-                    writeInThePipe(UPDATE, l_sQuote, NULL);
+                    sprintf(&l_sMD5Hash[l_iIterator * 2], "%02x", (unsigned int)l_iMD5Output[l_iIterator]);
                 }
-                LOG_INFO("Token [%s]", l_sQuote);
+
+                /*****************
+                *
+                *  MD5Quote save
+                *
+                *****************/
+                if(updateAndReadChecksumFile(l_structInitData->sName, l_sMD5Hash, CHECK_EXIST, &l_fileChecksum) != 1)
+                {
+                    updateAndReadChecksumFile(l_structInitData->sName, l_sMD5Hash, UPDATE, &l_fileChecksum);
+                    l_structInitData->structThreadStateInfo->iQuoteTreated++;
+
+                    if(keyWordsDetection(l_sQuote, l_structKeyWords) == EXIT_SUCCESS)
+                    {
+                        writeInThePipe(UPDATE, l_sQuote, NULL);
+                    }
+                    LOG_INFO("Token [%s]", l_sQuote);
+                }
+     
+                /*****************
+                *
+                *  Quote erase
+                *
+                *****************/
+                /* Remove end of line marker */
+                *(l_sQuote + strlen(l_sQuote)) = ' ';
+                memset(l_sCursor, ' ', strlen(TOKEN_DELIMITER_FOR_DATA_END));
             }
- 
-            /*****************
-            *
-            *  Quote erase
-            *
-            *****************/
-            /* Remove end of line marker */
-            *(l_sQuote + strlen(l_sQuote)) = ' ';
-            memset(l_sCursor, ' ', strlen(TOKEN_DELIMITER_FOR_DATA_END));
         }
-    }
-    else
-    {
-        LOG_INFO("Page %s NOT retrieved. Network error.", l_sUrl);
+        else
+        {
+            LOG_ERROR("Page %s NOT retrieved. Network error.", l_sUrl);
+            *l_iReturnValue = 1;
+        }
     }
 
     updateAndReadChecksumFile(l_structInitData->sName, NULL, CLOSE, &l_fileChecksum);
-    *l_iReturnValue = 314;              /* Test value */
 
 
     free(l_sUrl);
@@ -242,12 +250,16 @@ void networkLoop(int p_iHowManyCompagnies)
     int l_iMaxLenOfALine;
     char* l_sCompagnyName;
     char* l_sKeyWords;
+    char l_cCommand;
+    char l_bCanLeaveTheProgram;
     pthread_t* l_structPagePoolingThreadID;
 
     l_iMaxLenOfALine = findLongestLineLenght(NULL) + 1;
     l_sCompagnyName = (char*)malloc(l_iMaxLenOfALine * sizeof(char));
     l_sKeyWords = (char*)malloc(l_iMaxLenOfALine * sizeof(char));
     if(l_sCompagnyName == NULL || l_sKeyWords == NULL) exit(ENOMEM);
+    l_cCommand = 0;
+    l_bCanLeaveTheProgram = FALSE;
 
     l_structPagePoolingInitInformation = (structPagePoolingInitData*)malloc(p_iHowManyCompagnies * sizeof(structPagePoolingInitData));
     l_structPagePoolingThreadID = (pthread_t*)malloc(p_iHowManyCompagnies * sizeof(pthread_t));
@@ -281,6 +293,7 @@ void networkLoop(int p_iHowManyCompagnies)
             /* We have a valid name */
             (l_structPagePoolingInitInformation + l_iThreadNumber)->sName = (char*)malloc((strlen(l_sCompagnyName) + 1) * sizeof(char));
             (l_structPagePoolingInitInformation + l_iThreadNumber)->sKeyWords = (char*)malloc((strlen(l_sKeyWords) + 1)  * sizeof(char));
+            (l_structPagePoolingInitInformation + l_iThreadNumber)->structThreadStateInfo = (threadStateInfo*)malloc(sizeof(threadStateInfo));
             if((l_structPagePoolingInitInformation + l_iThreadNumber)->sName == NULL || (l_structPagePoolingInitInformation + l_iThreadNumber)->sKeyWords == NULL) exit(ENOMEM);
 
             strcpy((l_structPagePoolingInitInformation + l_iThreadNumber)->sName, l_sCompagnyName);
@@ -307,36 +320,62 @@ void networkLoop(int p_iHowManyCompagnies)
         }
     }while(l_iReturnedValue != EOF);
 
-
-
-
-
     /* Wait for the end of all pooling threads */
     LOG_INFO("Thread starting is OK. %d threads pushed", p_iHowManyCompagnies);
-    for(l_iIterator = 0; l_iIterator < p_iHowManyCompagnies; l_iIterator++)
+
+
+
+
+    /* Wait user command */
+    do
     {
-        if(*(l_structPagePoolingThreadID + l_iIterator) != 0)
+        l_cCommand = getchar();
+
+        switch(l_cCommand)
         {
-            if(pthread_join(*(l_structPagePoolingThreadID + l_iIterator), (void*)&l_iReturnedThreadValue) != 0)
-            {
-                LOG_ERROR("Error on pthread_joined, errno %d", errno);
-            }
-            else
-            {
-                LOG_INFO("Returned value for %d is %d", l_iIterator, *l_iReturnedThreadValue);
-                *(l_structPagePoolingThreadID + l_iIterator) = 0;
+            case 'q':
+            case 'Q':
+                for(l_iIterator = 0; l_iIterator < p_iHowManyCompagnies; l_iIterator++)
+                {
+                    (l_structPagePoolingInitInformation + l_iIterator)->structThreadStateInfo->bHaveToDie = TRUE;
+                    if(*(l_structPagePoolingThreadID + l_iIterator) != 0)
+                    {
+                        if(pthread_join(*(l_structPagePoolingThreadID + l_iIterator), (void*)&l_iReturnedThreadValue) != 0)
+                        {
+                            LOG_ERROR("Error on pthread_joined, errno %d", errno);
+                        }
+                        else
+                        {
+                            LOG_INFO("Returned value for %d is %d", l_iIterator, *l_iReturnedThreadValue);
+                            if(*l_iReturnedThreadValue != 0)
+                            {
+                                LOG_ERROR("Thread %s close badly, it haven't does the job.", (l_structPagePoolingInitInformation + l_iIterator)->sName);
+                            }
+                            *(l_structPagePoolingThreadID + l_iIterator) = 0;
 
-                /* release memory declared in/for the thread */
-                free(l_iReturnedThreadValue);
-                free((l_structPagePoolingInitInformation + l_iIterator)->sName);
-                free((l_structPagePoolingInitInformation + l_iIterator)->sKeyWords);
-            }
+                            /* release memory declared in/for the thread */
+                            free(l_iReturnedThreadValue);
+                            free((l_structPagePoolingInitInformation + l_iIterator)->sName);
+                            free((l_structPagePoolingInitInformation + l_iIterator)->sKeyWords);
+                            free((l_structPagePoolingInitInformation + l_iIterator)->structThreadStateInfo);
+                        }
+                    }
+                }
+
+                free(l_structPagePoolingInitInformation);
+                free(l_sCompagnyName);
+                free(l_sKeyWords);
+
+                l_bCanLeaveTheProgram = TRUE;
+                break;
+
+            default:
+                LOG_INFO("Unrecognized command [%c]", l_cCommand);
+                break;
         }
-    }
+    }while(l_bCanLeaveTheProgram != TRUE);
 
-    free(l_structPagePoolingInitInformation);
-    free(l_sCompagnyName);
-    free(l_sKeyWords);
+
 }
 
 

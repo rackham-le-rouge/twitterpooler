@@ -70,9 +70,20 @@ struct MemoryStruct {
     size_t size;
 };
 
+/*** Padding is for avoid multi-thread concurent access to the same memory sector - speed improvement */
+typedef struct ThreadStateInfo_
+{
+    int iQuoteTreated;
+    char bHaveToDie;
+    char padding[64];
+}threadStateInfo;
+
+/*** Padding is for avoid multi-thread concurent access to the same memory sector - speed improvement */
 struct PagePoolingInitData {
     char* sName;
     char* sKeyWords;
+    threadStateInfo* structThreadStateInfo;
+    char padding[64];
 };
 
 typedef struct PagePoolingInitData structPagePoolingInitData;
