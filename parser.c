@@ -161,6 +161,43 @@ void rtrim(char* p_sString)
     *(l_cCursor + 2) = '\0';
 }
 
+/**
+ * @brief Remove all useless spaces by compressiing sentence on the left. Leave spaces on the right side. Use rtim() after
+ * @param p_sString : the sentence to clean
+ * @return p_sString : the sentence is modified directlly at its own memory address
+ */
+void removeUselessSpaces(char* p_sString)
+{
+    char* l_cCursor;
+    char* l_cCursorDetached;
+
+    /* the detached cursor is on the old version of the sentence -exploring-, and the cursor is
+     * on the new version. If there is no useless spaces, this two cursors will be equals */
+    l_cCursor = p_sString;
+    l_cCursorDetached = p_sString;
+
+    while(*l_cCursorDetached != '\0')
+    {
+        if(*l_cCursorDetached == ' ')
+        {
+            *l_cCursor = *l_cCursorDetached;
+            l_cCursor++;
+            l_cCursorDetached++;
+
+            while(*l_cCursorDetached == ' ' && *l_cCursorDetached != '\0')
+            {
+                l_cCursorDetached++;
+            }
+        }
+        else
+        {
+            *l_cCursor = *l_cCursorDetached;
+            l_cCursor++;
+            l_cCursorDetached++;
+        }
+    }
+}
+
 
 
 /**
