@@ -172,6 +172,7 @@ void* threadPagePooling (void* p_structInitData)
                 *****************/
                 convertHTML2ASCII(l_sQuote);
                 removeHTMLContent(l_sQuote);
+                removeUnwantedCharacters(l_sQuote);
                 removeUselessSpaces(l_sQuote);
                 toLowerCase(l_sQuote);
                 rtrim(l_sQuote);

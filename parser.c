@@ -213,6 +213,26 @@ void toLowerCase(char* p_sString)
     }
 }
 
+/**
+ * @brief In order to remove all unwanted characters of a sentence
+ * like tab, newline etc...
+ * @param p_sString : string to convert to lower case
+ * @return p_sString : the string is directly modified at its own memory address
+ */
+void removeUnwantedCharacters(char* p_sString)
+{
+    while(*p_sString != '\0')
+    {
+        if( *p_sString == '\n' ||
+            *p_sString == 9 ||
+            *p_sString == 13)
+        {
+            *p_sString = ' ';
+        }
+        p_sString++;
+    }
+}
+
 
 
 /**

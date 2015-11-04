@@ -30,5 +30,6 @@ int keyWordsDetection(char* p_sQuote, linkedListKeywords* p_structKeywords);
 char* extractWordLevel(char* p_cSpecialWordLevel, int* p_iWordLevel, char* p_sKeyWord, int* p_iWordLenght);
 void removeUselessSpaces(char* p_sString);
 void toLowerCase(char* p_sString);
+void removeUnwantedCharacters(char* p_sString);
 
 #endif
