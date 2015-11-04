@@ -13,9 +13,6 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-/* In order to add getch() function */
-#define _POSIX_SOURCE
-
 /* Some includes */
 #include <stdlib.h>
 #include <stdio.h>
@@ -60,6 +57,7 @@
 #define SCREEN_SIZE_COLUMN_MIN          20
 #define PIPE_NAME                       "extractedTwitter"
 #define WORD_CORRELATION                0.80        /* Means that we can have 20% of difference between the read word and the keyword */
+#define REFRESH_TIME_NANOSEC            5000000
 
 
 #ifdef USE_COLORED_LOG

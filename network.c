@@ -253,6 +253,7 @@ void networkLoop(int p_iHowManyCompagnies)
     char l_cCommand;
     char l_bCanLeaveTheProgram;
     pthread_t* l_structPagePoolingThreadID;
+    struct timespec l_structRefreshTime;
 
     l_iMaxLenOfALine = findLongestLineLenght(NULL) + 1;
     l_sCompagnyName = (char*)malloc(l_iMaxLenOfALine * sizeof(char));
@@ -260,6 +261,8 @@ void networkLoop(int p_iHowManyCompagnies)
     if(l_sCompagnyName == NULL || l_sKeyWords == NULL) exit(ENOMEM);
     l_cCommand = 0;
     l_bCanLeaveTheProgram = FALSE;
+    l_structRefreshTime.tv_sec = 0;
+    l_structRefreshTime.tv_nsec = REFRESH_TIME_NANOSEC;
 
     l_structPagePoolingInitInformation = (structPagePoolingInitData*)malloc(p_iHowManyCompagnies * sizeof(structPagePoolingInitData));
     l_structPagePoolingThreadID = (pthread_t*)malloc(p_iHowManyCompagnies * sizeof(pthread_t));
@@ -370,7 +373,7 @@ void networkLoop(int p_iHowManyCompagnies)
                 break;
 
             default:
-                sleep(1);
+                nanosleep(&l_structRefreshTime, NULL);
                 break;
         }
     }while(l_bCanLeaveTheProgram != TRUE);
