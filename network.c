@@ -329,7 +329,7 @@ void networkLoop(int p_iHowManyCompagnies)
     /* Wait user command */
     do
     {
-        l_cCommand = getchar();
+        l_cCommand = getkey();
 
         switch(l_cCommand)
         {
@@ -370,7 +370,7 @@ void networkLoop(int p_iHowManyCompagnies)
                 break;
 
             default:
-                LOG_INFO("Unrecognized command [%c]", l_cCommand);
+                sleep(1);
                 break;
         }
     }while(l_bCanLeaveTheProgram != TRUE);

@@ -13,6 +13,9 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+/* In order to add getch() function */
+#define _POSIX_SOURCE
+
 /* Some includes */
 #include <stdlib.h>
 #include <stdio.h>
@@ -33,6 +36,8 @@
 #include <openssl/md5.h>
 #include <fcntl.h>
 #include <ctype.h>
+#include <termios.h>
+
 
 /* Some constants */
 #define DEBUG_LEVEL	                    5
