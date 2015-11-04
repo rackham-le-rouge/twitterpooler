@@ -36,6 +36,7 @@
 
 /* Some constants */
 #define DEBUG_LEVEL	                    5
+#define USE_COLORED_LOG                 1
 #define URL_LENGTH                      9 /* At least add 1 to the real URL lenght for the \0 */
 #define URL_PREFIX                      "https://twitter.com/"
 #define TOKEN_DELIMITER_FOR_DATA_START  "js-tweet-text tweet-text\""
@@ -54,6 +55,25 @@
 #define SCREEN_SIZE_COLUMN_MIN          20
 #define PIPE_NAME                       "extractedTwitter"
 #define WORD_CORRELATION                0.80        /* Means that we can have 20% of difference between the read word and the keyword */
+
+
+#ifdef USE_COLORED_LOG
+    #define ANSI_COLOR_RED     "\x1b[31m"
+    #define ANSI_COLOR_GREEN   "\x1b[32m"
+    #define ANSI_COLOR_YELLOW  "\x1b[33m"
+    #define ANSI_COLOR_BLUE    "\x1b[34m"
+    #define ANSI_COLOR_MAGENTA "\x1b[35m"
+    #define ANSI_COLOR_CYAN    "\x1b[36m"
+    #define ANSI_COLOR_RESET   "\x1b[0m"
+#else
+    #define ANSI_COLOR_RED     ""
+    #define ANSI_COLOR_GREEN   ""
+    #define ANSI_COLOR_YELLOW  ""
+    #define ANSI_COLOR_BLUE    ""
+    #define ANSI_COLOR_MAGENTA ""
+    #define ANSI_COLOR_CYAN    ""
+    #define ANSI_COLOR_RESET   ""
+#endif
 
 /* Logic stuff */
 enum boolean
@@ -110,19 +130,19 @@ typedef struct linkedListKeywords_
 #define UNUSED(x) (void)(x)
 
 #if(DEBUG_LEVEL > 0)
-#define LOG_ERROR(p_sStr, ...)      fprintf(stderr, "%s ERR [%d]:" p_sStr "\n", __FILE__, __LINE__, __VA_ARGS__);
+#define LOG_ERROR(p_sStr, ...)      fprintf(stderr, ANSI_COLOR_MAGENTA "%s " ANSI_COLOR_RED "ERR " ANSI_COLOR_BLUE "[%d]:" ANSI_COLOR_RESET p_sStr "\n", __FILE__, __LINE__, __VA_ARGS__);
 #else
 #define LOG_ERROR(p_sStr, ...)
 #endif
 
 #if(DEBUG_LEVEL > 1)
-#define LOG_WARNING(p_sStr, ...)      fprintf(stderr, "%s WARN [%d]:" p_sStr "\n", __FILE__, __LINE__, __VA_ARGS__);
+#define LOG_WARNING(p_sStr, ...)      fprintf(stderr, ANSI_COLOR_MAGENTA "%s " ANSI_COLOR_YELLOW "WARN " ANSI_COLOR_BLUE "[%d]:" ANSI_COLOR_RESET p_sStr "\n", __FILE__, __LINE__, __VA_ARGS__);
 #else
 #define LOG_WARNING(p_sStr, ...)
 #endif
 
 #if(DEBUG_LEVEL > 2)
-#define LOG_INFO(p_sStr, ...)      fprintf(stderr, "%s INFO [%d]:" p_sStr "\n", __FILE__, __LINE__, __VA_ARGS__);
+#define LOG_INFO(p_sStr, ...)      fprintf(stderr, ANSI_COLOR_MAGENTA "%s " ANSI_COLOR_GREEN "INFO " ANSI_COLOR_BLUE "[%d]:" ANSI_COLOR_RESET p_sStr "\n", __FILE__, __LINE__, __VA_ARGS__);
 #else
 #define LOG_INFO(p_sStr, ...)
 #endif

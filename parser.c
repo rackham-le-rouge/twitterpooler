@@ -288,7 +288,7 @@ linkedListKeywords* getKeywords(char* p_sKeywords)
         l_iWordLenght = 0;
         l_cCursor++;
 
-        LOG_INFO("Parameter [%s] WordLevel %d:%c", l_structCurrent->sKeyword, l_structCurrent->iWordLevel, l_structCurrent->cSpecialWordLevel);
+        LOG_INFO("Parameter "ANSI_COLOR_GREEN"[%s]"ANSI_COLOR_RESET" WordLevel "ANSI_COLOR_BLUE"%d:%c" ANSI_COLOR_RESET, l_structCurrent->sKeyword, l_structCurrent->iWordLevel, l_structCurrent->cSpecialWordLevel);
     }
     return l_structAnchor;
 }
@@ -316,7 +316,7 @@ void cleanKeywords(linkedListKeywords* p_structKeywords)
         l_structCurrent = l_structNext;
         l_iCounter++;
     }
-    LOG_INFO("Free %d level in the linked list.", l_iCounter);
+    LOG_INFO("Free "ANSI_COLOR_GREEN"%d"ANSI_COLOR_RESET" level in the linked list.", l_iCounter);
 }
 
 

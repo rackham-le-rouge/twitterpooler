@@ -145,7 +145,7 @@ int checkConfigurationFiles(void)
 
     if(checkIfAFileExist(CONFIGURATION_FILE) != EEXIST)
     {
-        LOG_ERROR("configuration file %s missing", CONFIGURATION_FILE);
+        LOG_ERROR("configuration file "ANSI_COLOR_RED"%s"ANSI_COLOR_RESET" missing", CONFIGURATION_FILE);
         return -EXIT_FAILURE;
     }
 
@@ -174,7 +174,7 @@ int checkConfigurationFiles(void)
 
                 /* Remove the 'compagny' marker. It was arbitrary decided */
                 l_sLine[l_iCursor - 1] = '\0';
-                LOG_INFO("Checking compagny %s", l_sLine);
+                LOG_INFO("Checking compagny "ANSI_COLOR_GREEN"%s"ANSI_COLOR_RESET, l_sLine);
                 l_iCompagnyCounter++;
 
                 bzero(l_sFileWithCompagnyChecksums, l_iMaxLenOfALine);
@@ -372,14 +372,14 @@ int updateAndReadChecksumFile(char* p_sName, char* p_sMD5Hash, enum checksumFile
             }
             else
             {
-                LOG_INFO("File %s correctlly opened.", l_sFileName);
+                LOG_INFO("File "ANSI_COLOR_GREEN"%s"ANSI_COLOR_RESET" correctlly opened.", l_sFileName);
             }
             break;
 
         /* you have to check if the p_sMD5Hash is already present in the file, this action
          * just append p_sMD5Hash to the end of the file */
         case UPDATE:
-            LOG_INFO("Add [%s]", p_sMD5Hash);
+            LOG_INFO("Add ["ANSI_COLOR_CYAN"%s"ANSI_COLOR_RESET"]", p_sMD5Hash);
             fseek (*p_fileChecksum, 0, SEEK_END);
             fprintf(*p_fileChecksum, "%s\n", p_sMD5Hash);
             break;

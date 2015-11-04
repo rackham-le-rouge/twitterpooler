@@ -113,7 +113,7 @@ void* threadPagePooling (void* p_structInitData)
     char l_sMD5Hash[33];
     unsigned char l_iMD5Output[16];     /* Declared as an array of bytes */
 
-    LOG_INFO("Thread for %s started.", l_structInitData->sName);
+    LOG_INFO("Thread for "ANSI_COLOR_RED"%s "ANSI_COLOR_RESET"started.", l_structInitData->sName);
 
     l_iMaxSizeOfTheUrl = findLongestLineLenght(NULL) + strlen(URL_PREFIX) + 2;  /* 1 for the / and 1 for the \0 means 2 */
     l_iReturnValue = (int*)malloc(sizeof(int));
@@ -203,7 +203,7 @@ void* threadPagePooling (void* p_structInitData)
                     {
                         writeInThePipe(UPDATE, l_sQuote, NULL);
                     }
-                    LOG_INFO("Token [%s]", l_sQuote);
+                    LOG_INFO("Token "ANSI_COLOR_YELLOW"[%s]"ANSI_COLOR_RESET, l_sQuote);
                 }
      
                 /*****************
@@ -218,7 +218,7 @@ void* threadPagePooling (void* p_structInitData)
         }
         else
         {
-            LOG_ERROR("Page %s NOT retrieved. Network error.", l_sUrl);
+            LOG_ERROR("Page "ANSI_COLOR_RED"%s"ANSI_COLOR_RESET" NOT retrieved. Network error.", l_sUrl);
             *l_iReturnValue = 1;
         }
     }
@@ -299,13 +299,13 @@ void networkLoop(int p_iHowManyCompagnies)
             strcpy((l_structPagePoolingInitInformation + l_iThreadNumber)->sName, l_sCompagnyName);
             strcpy((l_structPagePoolingInitInformation + l_iThreadNumber)->sKeyWords, l_sKeyWords);
 
-            LOG_INFO("Start thread for %s", (l_structPagePoolingInitInformation + l_iThreadNumber)->sName);
+            LOG_INFO(ANSI_COLOR_CYAN"Start thread"ANSI_COLOR_RESET" for %s", (l_structPagePoolingInitInformation + l_iThreadNumber)->sName);
             if(pthread_create(  l_structPagePoolingThreadID + l_iThreadNumber,
                                 NULL,
                                 threadPagePooling,
                                 (void*)(l_structPagePoolingInitInformation + l_iThreadNumber)) < 0)
             {
-                LOG_ERROR("Creating thread number %d for compagny %s failed.", l_iThreadNumber, l_sCompagnyName);
+                LOG_ERROR("Creating thread number %d for compagny "ANSI_COLOR_GREEN"%s"ANSI_COLOR_RESET" failed.", l_iThreadNumber, l_sCompagnyName);
             }
             else
             {
@@ -315,13 +315,13 @@ void networkLoop(int p_iHowManyCompagnies)
         }
         else if(l_iReturnedValue == EXIT_FAILURE)
         {
-            LOG_ERROR("Thread creation killed. Compagny extraction failed. errno %d", errno);
+            LOG_ERROR("Thread creation "ANSI_COLOR_RED"killed"ANSI_COLOR_RESET". Compagny extraction failed. errno %d", errno);
             break;
         }
     }while(l_iReturnedValue != EOF);
 
     /* Wait for the end of all pooling threads */
-    LOG_INFO("Thread starting is OK. %d threads pushed", p_iHowManyCompagnies);
+    LOG_INFO("Thread starting is "ANSI_COLOR_GREEN"OK"ANSI_COLOR_RESET". "ANSI_COLOR_BLUE"%d"ANSI_COLOR_RESET" threads pushed", p_iHowManyCompagnies);
 
 
 
@@ -342,14 +342,14 @@ void networkLoop(int p_iHowManyCompagnies)
                     {
                         if(pthread_join(*(l_structPagePoolingThreadID + l_iIterator), (void*)&l_iReturnedThreadValue) != 0)
                         {
-                            LOG_ERROR("Error on pthread_joined, errno %d", errno);
+                            LOG_ERROR("Error on "ANSI_COLOR_YELLOW"pthread_joined"ANSI_COLOR_RESET", errno %d", errno);
                         }
                         else
                         {
                             LOG_INFO("Returned value for %d is %d", l_iIterator, *l_iReturnedThreadValue);
                             if(*l_iReturnedThreadValue != 0)
                             {
-                                LOG_ERROR("Thread %s close badly, it haven't does the job.", (l_structPagePoolingInitInformation + l_iIterator)->sName);
+                                LOG_ERROR("Thread %s close "ANSI_COLOR_RED"badly"ANSI_COLOR_RESET", it haven't does the job.", (l_structPagePoolingInitInformation + l_iIterator)->sName);
                             }
                             *(l_structPagePoolingThreadID + l_iIterator) = 0;
 
