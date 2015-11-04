@@ -124,6 +124,7 @@ void* threadPagePooling (void* p_structInitData)
     l_structKeyWords = NULL;
     l_structInitData->structThreadStateInfo->bHaveToDie = FALSE;
     l_structInitData->structThreadStateInfo->iQuoteTreated = 0;
+    l_structInitData->structThreadStateInfo->iQuotePushed = 0;
     *l_iReturnValue = 0;
 
     updateAndReadChecksumFile(l_structInitData->sName, NULL, INIT, &l_fileChecksum);
@@ -202,6 +203,7 @@ void* threadPagePooling (void* p_structInitData)
                     if(keyWordsDetection(l_sQuote, l_structKeyWords) == EXIT_SUCCESS)
                     {
                         writeInThePipe(UPDATE, l_sQuote, NULL);
+                        l_structInitData->structThreadStateInfo->iQuotePushed++;
                     }
                     LOG_INFO("Token "ANSI_COLOR_YELLOW"[%s]"ANSI_COLOR_RESET, l_sQuote);
                 }
@@ -253,7 +255,11 @@ void networkLoop(int p_iHowManyCompagnies)
     char l_cCommand;
     char l_bCanLeaveTheProgram;
     pthread_t* l_structPagePoolingThreadID;
-    struct timespec l_structRefreshTime;
+    int l_iActiveThread;
+    int l_iLastActiveThread;
+    int l_iTotalQuoteTreated;
+    int l_iHaveToRefresh;
+    char l_sLastActiveThreadName[PROGRESS_BAR_CPY_NAME_LENGHT];
 
     l_iMaxLenOfALine = findLongestLineLenght(NULL) + 1;
     l_sCompagnyName = (char*)malloc(l_iMaxLenOfALine * sizeof(char));
@@ -261,12 +267,15 @@ void networkLoop(int p_iHowManyCompagnies)
     if(l_sCompagnyName == NULL || l_sKeyWords == NULL) exit(ENOMEM);
     l_cCommand = 0;
     l_bCanLeaveTheProgram = FALSE;
-    l_structRefreshTime.tv_sec = 0;
-    l_structRefreshTime.tv_nsec = REFRESH_TIME_NANOSEC;
+    l_iActiveThread = 0;
+    l_iLastActiveThread = 0;
+    l_iTotalQuoteTreated = 0;
+    l_iHaveToRefresh = 0;
 
     l_structPagePoolingInitInformation = (structPagePoolingInitData*)malloc(p_iHowManyCompagnies * sizeof(structPagePoolingInitData));
     l_structPagePoolingThreadID = (pthread_t*)malloc(p_iHowManyCompagnies * sizeof(pthread_t));
     l_iReturnedThreadValue = NULL;
+    bzero(l_sLastActiveThreadName, PROGRESS_BAR_CPY_NAME_LENGHT);
 
     if(l_structPagePoolingInitInformation == NULL)
     {
@@ -330,9 +339,47 @@ void networkLoop(int p_iHowManyCompagnies)
 
 
     /* Wait user command */
+    strcpy(l_sLastActiveThreadName, "Starting...");
+    printProgressBar(p_iHowManyCompagnies, 0, l_sLastActiveThreadName, 0);
     do
     {
         l_cCommand = getkey();
+
+        if(l_iHaveToRefresh++ > 2)
+        {
+            l_iActiveThread = 0;
+            l_iLastActiveThread = -1;
+            for(l_iThreadNumber = 0; l_iThreadNumber < p_iHowManyCompagnies; l_iThreadNumber++)
+            {
+                l_iTotalQuoteTreated += (l_structPagePoolingInitInformation + l_iThreadNumber)->structThreadStateInfo->iQuoteTreated;
+                (l_structPagePoolingInitInformation + l_iThreadNumber)->structThreadStateInfo->iQuoteTreated = 0;
+                if((l_structPagePoolingInitInformation + l_iThreadNumber)->structThreadStateInfo->iQuotePushed > 0)
+                {
+                    l_iActiveThread++;
+                    l_iLastActiveThread = l_iThreadNumber;
+                    (l_structPagePoolingInitInformation + l_iThreadNumber)->structThreadStateInfo->iQuotePushed = 0;
+                }
+            }
+
+            if(l_iLastActiveThread < 0)
+            {
+                strcpy(l_sLastActiveThreadName, "nothing");
+                l_iLastActiveThread = 0;
+            }
+            else
+            {
+                memcpy(l_sLastActiveThreadName, (l_structPagePoolingInitInformation + l_iLastActiveThread)->sName,
+                    strlen((l_structPagePoolingInitInformation + l_iLastActiveThread)->sName) > PROGRESS_BAR_CPY_NAME_LENGHT - 1 ?
+                    PROGRESS_BAR_CPY_NAME_LENGHT - 1 :
+                    strlen((l_structPagePoolingInitInformation + l_iLastActiveThread)->sName));
+
+                l_sLastActiveThreadName[
+                    strlen((l_structPagePoolingInitInformation + l_iLastActiveThread)->sName) > PROGRESS_BAR_CPY_NAME_LENGHT - 1 ? 
+                    PROGRESS_BAR_CPY_NAME_LENGHT : 
+                    strlen((l_structPagePoolingInitInformation + l_iLastActiveThread)->sName)] = '\0';
+            }
+            printProgressBar(p_iHowManyCompagnies, l_iActiveThread, l_sLastActiveThreadName, l_iTotalQuoteTreated);
+        }
 
         switch(l_cCommand)
         {
@@ -373,7 +420,7 @@ void networkLoop(int p_iHowManyCompagnies)
                 break;
 
             default:
-                nanosleep(&l_structRefreshTime, NULL);
+                sleep(1);
                 break;
         }
     }while(l_bCanLeaveTheProgram != TRUE);
