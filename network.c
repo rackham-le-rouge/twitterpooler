@@ -259,7 +259,8 @@ void networkLoop(int p_iHowManyCompagnies)
     int l_iActiveThread;
     int l_iLastActiveThread;
     int l_iTotalQuoteTreated;
-    int l_iHaveToRefresh;
+    long l_lHaveToRefresh;
+    struct timespec l_structRefreshTime;
     char l_sLastActiveThreadName[PROGRESS_BAR_CPY_NAME_LENGHT];
 
     l_iMaxLenOfALine = findLongestLineLenght(NULL) + 1;
@@ -271,7 +272,9 @@ void networkLoop(int p_iHowManyCompagnies)
     l_iActiveThread = 0;
     l_iLastActiveThread = 0;
     l_iTotalQuoteTreated = 0;
-    l_iHaveToRefresh = 0;
+    l_lHaveToRefresh = 0;
+    l_structRefreshTime.tv_sec = KEYBOARD_TIME_SEC;
+    l_structRefreshTime.tv_nsec = KEYBOARD_TIME_MILISEC * 1000000;
 
     l_structPagePoolingInitInformation = (structPagePoolingInitData*)malloc(p_iHowManyCompagnies * sizeof(structPagePoolingInitData));
     l_structPagePoolingThreadID = (pthread_t*)malloc(p_iHowManyCompagnies * sizeof(pthread_t));
@@ -346,7 +349,8 @@ void networkLoop(int p_iHowManyCompagnies)
     {
         l_cCommand = getkey();
 
-        if(l_iHaveToRefresh++ > 10)     /* FIXME add a system to control refresh time */
+        l_lHaveToRefresh += KEYBOARD_TIME_MILISEC + KEYBOARD_TIME_SEC * 1000;
+        if(l_lHaveToRefresh > (REFRESH_TIME_SEC * 1000))
         {
             l_iActiveThread = 0;
             l_iLastActiveThread = -1;
@@ -380,7 +384,7 @@ void networkLoop(int p_iHowManyCompagnies)
                     strlen((l_structPagePoolingInitInformation + l_iLastActiveThread)->sName)] = '\0';
             }
             printProgressBar(p_iHowManyCompagnies, l_iActiveThread, l_sLastActiveThreadName, l_iTotalQuoteTreated);
-            l_iHaveToRefresh = 0;
+            l_lHaveToRefresh = 0;
         }
 
         switch(l_cCommand)
@@ -422,7 +426,7 @@ void networkLoop(int p_iHowManyCompagnies)
                 break;
 
             default:
-                sleep(1);       /* FIXME reintegration of nanosecond */
+                nanosleep(&l_structRefreshTime, NULL);
                 break;
         }
     }while(l_bCanLeaveTheProgram != TRUE);

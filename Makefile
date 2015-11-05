@@ -16,7 +16,7 @@
 # -Wpadded		: need to fix it. There is a problem with the structure, memory is not optimized
 
 CC=gcc
-ADDED_OPS=-D_POSIX_SOURCE
+ADDED_OPS=-D_POSIX_C_SOURCE=199309L
 CFLAGS=          -W -Waggregate-return -Wall -Warray-bounds -Wbad-function-cast -Wcast-align -Wcast-qual 	\
                  -Wchar-subscripts -Wcomment -Wdeclaration-after-statement -Werror -Wextra -Wfloat-equal        \
                  -Wformat -Wformat-nonliteral -Wformat-security -Wformat-y2k -Wignored-qualifiers -Wimplicit    \

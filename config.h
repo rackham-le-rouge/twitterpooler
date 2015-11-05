@@ -57,6 +57,9 @@
 #define SCREEN_SIZE_COLUMN_MIN          20
 #define PIPE_NAME                       "extractedTwitter"
 #define WORD_CORRELATION                0.80        /* Means that we can have 20% of difference between the read word and the keyword */
+#define KEYBOARD_TIME_MILISEC           100
+#define KEYBOARD_TIME_SEC               0
+#define REFRESH_TIME_SEC                10
 #define PROGRESS_BAR_CPY_NAME_LENGHT    10
 
 
