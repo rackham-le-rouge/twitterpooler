@@ -340,13 +340,13 @@ void networkLoop(int p_iHowManyCompagnies)
 
 
     /* Wait user command */
-    strcpy(l_sLastActiveThreadName, "Starting...");
+    strcpy(l_sLastActiveThreadName, "Starting");
     printProgressBar(p_iHowManyCompagnies, 0, l_sLastActiveThreadName, 0);
     do
     {
         l_cCommand = getkey();
 
-        if(l_iHaveToRefresh++ > 2)
+        if(l_iHaveToRefresh++ > 10)     /* FIXME add a system to control refresh time */
         {
             l_iActiveThread = 0;
             l_iLastActiveThread = -1;
@@ -380,6 +380,7 @@ void networkLoop(int p_iHowManyCompagnies)
                     strlen((l_structPagePoolingInitInformation + l_iLastActiveThread)->sName)] = '\0';
             }
             printProgressBar(p_iHowManyCompagnies, l_iActiveThread, l_sLastActiveThreadName, l_iTotalQuoteTreated);
+            l_iHaveToRefresh = 0;
         }
 
         switch(l_cCommand)
@@ -421,7 +422,7 @@ void networkLoop(int p_iHowManyCompagnies)
                 break;
 
             default:
-                sleep(1);
+                sleep(1);       /* FIXME reintegration of nanosecond */
                 break;
         }
     }while(l_bCanLeaveTheProgram != TRUE);
