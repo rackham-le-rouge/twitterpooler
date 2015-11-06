@@ -16,7 +16,8 @@
 # -Wpadded		: need to fix it. There is a problem with the structure, memory is not optimized
 
 CC=gcc
-ADDED_OPS=-D_POSIX_C_SOURCE=199309L
+REV=`cat revision`
+ADDED_OPS=-D_POSIX_C_SOURCE=199309L -D_BUILD_NUMBER=$(REV)
 CFLAGS=          -W -Waggregate-return -Wall -Warray-bounds -Wbad-function-cast -Wcast-align -Wcast-qual 	\
                  -Wchar-subscripts -Wcomment -Wdeclaration-after-statement -Werror -Wextra -Wfloat-equal        \
                  -Wformat -Wformat-nonliteral -Wformat-security -Wformat-y2k -Wignored-qualifiers -Wimplicit    \
@@ -42,6 +43,8 @@ full: mrproper $(EXEC)
 pooler: parser.o main.o network.o io.o
 	@$(CC) -o $@ $^ $(LDFLAGS)
 	@echo [LD] $@
+	@echo [BUILD] Build number $(REV)
+	@expr $(REV) + 1 > revision
 
 %.o: %.c
 	@$(CC) -o $@ -c $< $(CFLAGS)
