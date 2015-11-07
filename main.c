@@ -23,10 +23,6 @@ int g_iCurrentPID;
 #include "config.h"
 
 
-/** Revision and version number */
-char rev[] = "0.1";
-
-
 
 /** waitBetweenTwoTurn
  * @brief In order to be like a human browsing the site, we have to add some function in order to add a random behaviour
@@ -184,17 +180,19 @@ int main(int argc, char** argv)
     srand(time(NULL));
 
     LOG_PRINT("\n"
-            "         _/_/_/_/   _/_/_/   _/   _/   _/_/_/     \n"
-            "       _/         _/    _/  _/   _/  _/    _/     \n"
-            "      _/         _/    _/  _/   _/  _/    _/      \n"
-            "      _/_/_/    _/_/_/_/  _/   _/  _/_/_/_/       Twitter Flavor\n"
-            "           _/  _/    _/  _/  _/   _/    _/        \n"
-            "          _/  _/    _/  _/ _/    _/    _/         Rev %s \n"
-            "  _/_/_/_/   _/    _/  _/_/     _/    _/          \n\n\n", rev);
+            "         _/_/_/  _/_/_/   _/   _/   _/_/_/     \n"
+            "       _/      _/    _/  _/   _/  _/    _/     \n"
+            "      _/      _/    _/  _/   _/  _/    _/      \n"
+            "     _/_/_/  _/_/_/_/  _/   _/  _/_/_/_/       "ANSI_COLOR_BLUE"Twitter"ANSI_COLOR_RESET" Flavor\n"
+            "    _/      _/    _/  _/  _/   _/    _/        \n"
+            "   _/      _/    _/  _/ _/    _/    _/         Rev "ANSI_COLOR_GREEN"%d.%d"ANSI_COLOR_RED"-%d"ANSI_COLOR_RESET" \n"
+            "  _/      _/    _/  _/_/     _/    _/          \n\n"
+            "   "ANSI_COLOR_RED"F"ANSI_COLOR_RESET"avonius "ANSI_COLOR_RED"A"ANSI_COLOR_RESET"quilon "
+                 ANSI_COLOR_RED"V"ANSI_COLOR_RESET"ulturnus "ANSI_COLOR_RED"A"ANSI_COLOR_RESET"uster           \n\n\n", _PRG_VER_MAJOR, _PRG_VER_MINOR, _BUILD_NUMBER);
     LOG_INFO("\n\n\n"
             "    ===== SAVA Starting - Twitter Flavor ===== \n"
-            "           Revision %s Build %d                    \n"
-            "          %s : %s\n\n                         ", rev, _BUILD_NUMBER, __DATE__, __TIME__);
+            "           Revision %d.%d Build %d                    \n"
+            "          %s : %s\n\n                         ",  _PRG_VER_MAJOR, _PRG_VER_MINOR, _BUILD_NUMBER, __DATE__, __TIME__);
 
 
 

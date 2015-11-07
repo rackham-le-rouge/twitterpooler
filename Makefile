@@ -16,8 +16,10 @@
 # -Wpadded		: need to fix it. There is a problem with the structure, memory is not optimized
 
 CC=gcc
+REVISION_MAJOR=0
+REVISION_MINOR=1
 REV=`cat revision`
-ADDED_OPS=-D_POSIX_C_SOURCE=199309L -D_BUILD_NUMBER=$(REV)
+ADDED_OPS=-D_POSIX_C_SOURCE=199309L -D_BUILD_NUMBER=$(REV) -D_PRG_VER_MAJOR=$(REVISION_MAJOR) -D_PRG_VER_MINOR=$(REVISION_MINOR)
 CFLAGS=          -W -Waggregate-return -Wall -Warray-bounds -Wbad-function-cast -Wcast-align -Wcast-qual 	\
                  -Wchar-subscripts -Wcomment -Wdeclaration-after-statement -Werror -Wextra -Wfloat-equal        \
                  -Wformat -Wformat-nonliteral -Wformat-security -Wformat-y2k -Wignored-qualifiers -Wimplicit    \
