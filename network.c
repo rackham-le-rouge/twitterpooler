@@ -144,7 +144,7 @@ void* threadPagePooling (void* p_structInitData)
     {
         if(retrieveAnUrl(l_sUrl, &l_structMemory) == EXIT_SUCCESS)
         {
-            LOG_INFO("Page %s retrieved. Bytes %d", l_sUrl, l_structMemory.size);
+            LOG_INFO("Page %s retrieved. Bytes %d", l_sUrl, (int)l_structMemory.size);
 
             while(strstr(l_structMemory.memory, TOKEN_DELIMITER_FOR_DATA_START) != NULL)
             {
