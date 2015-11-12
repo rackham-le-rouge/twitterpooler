@@ -493,3 +493,42 @@ int writeInThePipe(enum checksumFileAction p_enumAction, char* p_sString, pthrea
 
     return EXIT_SUCCESS;
 }
+
+
+/**
+ * @brief Mail sending function defined according to the relative RFC-822
+ * This function use the exim4 binary. By default this binary is settled to send
+ * mails only to the localhost, you have to reconfigure it with dpkg-reconfigure exim4-config
+ * @param p_sDestAddress : thdestinataire@provider.com
+ * @parameter p_sSenderAddress : myaddress@provider.com
+ * @param p_sSubject : mail subject
+ * @param p_sMessage : mail content. Avoid using \n inside
+ */
+int sendMail(char* p_sDestAddress, char* p_sSenderAddress, char* p_sSubject, char* p_sMessage)
+{
+    int l_iRetval;
+    FILE* l_structMailPipe;;
+
+    l_iRetval = -1;
+    l_structMailPipe = popen("/usr/lib/sendmail -t", "w");
+
+    if (l_structMailPipe != NULL)
+    {
+        LOG_INFO("Send mail with subject "ANSI_COLOR_YELLOW"%s"ANSI_COLOR_RESET
+                " from "ANSI_COLOR_CYAN"%s"ANSI_COLOR_RESET
+                " to "ANSI_COLOR_RED"%s"ANSI_COLOR_RESET, p_sSubject, p_sSenderAddress, p_sDestAddress);
+        fprintf(l_structMailPipe, "To: %s\n", p_sDestAddress);
+        fprintf(l_structMailPipe, "From: %s\n", p_sSenderAddress);
+        fprintf(l_structMailPipe, "Subject: %s\n\n", p_sSubject);
+        fwrite(p_sMessage, 1, strlen(p_sMessage), l_structMailPipe);
+        fwrite(".\n", 1, 2, l_structMailPipe);
+        pclose(l_structMailPipe);
+        l_iRetval = 0;
+    }
+    else
+    {
+        LOG_ERROR("Failed to send a mail from "ANSI_COLOR_RED"%s"ANSI_COLOR_RESET
+                " to "ANSI_COLOR_RED"%s"ANSI_COLOR_RESET, p_sSenderAddress, p_sDestAddress);
+    }
+    return l_iRetval;
+}
